@@ -7,7 +7,7 @@
   const toggle = document.querySelector('.motion-toggle');
   if (!story || !scene || !phone || !watch || !toggle) return;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const mobile = window.matchMedia('(max-width: 760px)');
+  const mobile = window.matchMedia('(max-width: 900px)');
   const root = document.documentElement;
   let paused = false;
   let frame = 0;

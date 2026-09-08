@@ -1,6 +1,28 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
+test('experience navigation and own-file Watch walkthrough', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/unbound/');
+  await page.getByRole('link', { name: 'The experience', exact: true }).click();
+  await expect(page).toHaveURL(/\/experience\/$/);
+  await page.getByRole('link', { name: 'See how it works' }).click();
+  for (const [label, state, title] of [
+    ['Send them to your Watch.', 'transfer', 'Your audio, on its way.'],
+    ['Leave your phone behind.', 'listen', 'On your wrist. Ready offline.'],
+    ['Bring your own MP3s.', 'import', 'A file you already own.'],
+  ]) {
+    const button = page.getByRole('button', { name: new RegExp(label) });
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#journey-preview')).toHaveAttribute('data-state', state);
+    await expect(page.locator('#preview-title')).toHaveText(title);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+  expect(results.violations).toEqual([]);
+});
+
 async function jump(page, y) {
   await page.evaluate(y => window.scrollTo({ top: y, behavior: 'instant' }), y);
   await page.waitForTimeout(800);
@@ -14,12 +36,12 @@ test('renders branded assets, working navigation, and all public routes', async 
   page.on('pageerror', error => errors.push(error.message));
   const response = await page.goto('/unbound/');
   expect(response.status()).toBe(200);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Less noise.More story.');
-  expect(await page.locator('img').evaluateAll(images => images.every(img => img.complete && img.naturalWidth > 0))).toBe(true);
-  await page.getByRole('link', { name: 'Meet Unbound' }).click();
-  await expect(page).toHaveURL(/#your-library$/);
-  await expect(page.locator('#your-library')).toBeInViewport();
-  await page.getByRole('link', { name: 'Coming soon' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your audio.On your Watch.');
+  await expect.poll(() => page.locator('img:not([loading="lazy"])').evaluateAll(images => images.every(img => img.complete && img.naturalWidth > 0))).toBe(true);
+  await page.getByRole('link', { name: 'Explore the experience' }).click();
+  await expect(page).toHaveURL(/\/experience\/$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your files.Your wrist.Your world.');
+  await page.getByRole('link', { name: 'Coming soon', exact: true }).click();
   await expect(page.locator('#availability')).toBeInViewport();
   for (const path of ['privacy', 'terms', 'support']) {
     const response = await request.get(`/unbound/${path}`);
@@ -31,7 +53,7 @@ test('renders branded assets, working navigation, and all public routes', async 
 
 test('devices respond to scroll, pause, resume, and stop updating when idle', async ({ page }) => {
   await page.goto('/unbound/');
-  const mobile = await page.evaluate(() => innerWidth <= 760);
+  const mobile = await page.evaluate(() => innerWidth <= 900);
   await jump(page, mobile ? 320 : 0);
   const before = await transforms(page);
   await jump(page, mobile ? 600 : 900);
@@ -64,7 +86,8 @@ test('reduced motion is static on load and after preference changes', async ({ p
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect(page.locator('.motion-toggle')).toBeVisible();
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  expect(await transforms(page)).toEqual(before);
+  await expect(page.locator('.motion-toggle')).toBeHidden();
+  await expect.poll(() => transforms(page)).toEqual(before);
 });
 
 test('no horizontal overflow across phone, tablet, landscape, and desktop widths', async ({ page }) => {
@@ -76,10 +99,11 @@ test('no horizontal overflow across phone, tablet, landscape, and desktop widths
   }
 });
 
-test('keyboard access and WCAG accessibility checks', async ({ page }) => {
+test('keyboard access and WCAG accessibility checks', async ({ page, browserName }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/unbound/');
-  await page.keyboard.press('Tab');
+  // WebKit on macOS uses Option+Tab to include links with default keyboard settings.
+  await page.keyboard.press(browserName === 'webkit' ? 'Alt+Tab' : 'Tab');
   await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#main$/);
