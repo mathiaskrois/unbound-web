@@ -57,6 +57,12 @@ h1 { max-width: 800px; margin-bottom: 22px; font-size: clamp(3rem, 8vw, 6.4rem);
 .article .effective { margin-bottom: 36px; color: var(--mint); font-size: .92rem; }
 .contact-card { padding: 24px; border-radius: 18px; background: rgba(118, 167, 255, .11); color: var(--ink); }
 .contact-card p { margin-bottom: 0; }
+.owner-card { display: grid; grid-template-columns: 160px 1fr; gap: 25px; align-items: center; margin-top: 36px; padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.025)); }
+.owner-card img { width: 160px; height: 200px; border-radius: 14px; object-fit: cover; object-position: center top; }
+.owner-card h2 { margin-top: 0; }
+.owner-card p { margin-bottom: 12px; }
+.owner-card p:last-child { margin-bottom: 0; }
+.owner-kicker { color: var(--mint) !important; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .footer { border-top: 1px solid var(--line); padding: 26px 0 38px; color: var(--muted); font-size: .84rem; }
 .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 15px 28px; }
 .footer nav { justify-content: flex-start; }
@@ -67,4 +73,6 @@ h1 { max-width: 800px; margin-bottom: 22px; font-size: clamp(3rem, 8vw, 6.4rem);
   .hero { padding: 52px 0 64px; }
   .feature-grid { grid-template-columns: 1fr; padding-bottom: 58px; }
   .card { min-height: 0; }
+  .owner-card { grid-template-columns: 1fr; }
+  .owner-card img { width: 100%; height: min(55vw, 300px); object-position: center 28%; }
 }
