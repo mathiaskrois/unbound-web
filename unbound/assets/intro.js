@@ -8,10 +8,12 @@
 
   const overlay = document.createElement('div');
   overlay.className = 'site-intro';
-  overlay.innerHTML = '<video muted playsinline preload="auto" aria-hidden="true"></video><button type="button">Skip intro</button>';
+  overlay.innerHTML = '<video muted playsinline preload="auto" aria-hidden="true"></video><img hidden aria-hidden="true" alt=""><button type="button">Skip intro</button>';
   const video = overlay.querySelector('video');
+  const fallback = overlay.querySelector('img');
+  const introBase = new URL(document.currentScript.src);
   video.muted = true;
-  video.src = new URL('intro.mp4', document.currentScript.src).href;
+  video.src = new URL('intro.mp4', introBase).href;
   document.body.append(overlay);
   document.documentElement.classList.add('intro-playing');
   // Use the visible screen, including changes to mobile browser toolbars.
@@ -26,6 +28,14 @@
     if (video.videoHeight) {
       video.style.width = `${height * video.videoWidth / video.videoHeight}px`;
     }
+  }
+  function useGifFallback() {
+    video.style.display = 'none';
+    fallback.src = new URL('intro.gif', introBase).href;
+    fallback.hidden = false;
+    fallback.addEventListener('load', sizeVideo, { once: true });
+    sizeVideo();
+    setTimeout(finish, 5000);
   }
   sizeVideo();
   video.addEventListener('loadedmetadata', sizeVideo);
@@ -58,7 +68,7 @@
   document.addEventListener('keydown', onKey);
   motion.addEventListener('change', finish);
   video.addEventListener('ended', finish);
-  video.addEventListener('error', finish);
+  video.addEventListener('error', useGifFallback);
   video.addEventListener('playing', () => clearTimeout(loadingTimer), { once: true });
   loadingTimer = setTimeout(finish, 5000);
   safetyTimer = setTimeout(finish, 30000);
