@@ -59,7 +59,7 @@ h1 { max-width: 800px; margin-bottom: 22px; font-size: clamp(3rem, 8vw, 6.4rem);
 .contact-card { padding: 24px; border-radius: 18px; background: rgba(118, 167, 255, .11); color: var(--ink); }
 .contact-card p { margin-bottom: 0; }
 .owner-card { display: grid; grid-template-columns: 160px 1fr; gap: 25px; align-items: center; margin-top: 36px; padding: 18px; border: 1px solid var(--line); border-radius: 20px; background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.025)); }
-.owner-card img { width: 160px; height: 200px; border-radius: 14px; object-fit: cover; object-position: center top; }
+.owner-card img { width: 160px; height: auto; border-radius: 14px; display: block; }
 .owner-card h2 { margin-top: 0; }
 .owner-card p { margin-bottom: 12px; }
 .owner-card p:last-child { margin-bottom: 0; }
@@ -75,5 +75,5 @@ h1 { max-width: 800px; margin-bottom: 22px; font-size: clamp(3rem, 8vw, 6.4rem);
   .feature-grid { grid-template-columns: 1fr; padding-bottom: 58px; }
   .card { min-height: 0; }
   .owner-card { grid-template-columns: 1fr; }
-  .owner-card img { width: 100%; height: auto; object-fit: contain; }
+  .owner-card img { width: 100%; }
 }

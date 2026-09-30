@@ -57,7 +57,6 @@ test('shows the complete support portrait on mobile', async ({ page }) => {
   await expect(portrait).toBeVisible();
   await expect(portrait).toHaveJSProperty('naturalWidth', 719);
   await expect(portrait).toHaveJSProperty('naturalHeight', 900);
-  await expect(portrait).toHaveCSS('object-fit', 'contain');
   const box = await portrait.boundingBox();
   expect(box.height / box.width).toBeCloseTo(900 / 719, 2);
 });
