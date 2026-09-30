@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test('intro fades after the lead-in and 4.5 seconds of animation and keeps playing through the fade', async ({ page }) => {
+test('intro fades at the original animation endpoint and keeps playing through the fade', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/unbound/');
   await page.getByRole('button', { name: 'Enter Unbound, play video with sound' }).click();
@@ -30,8 +30,8 @@ test('intro fades after the lead-in and 4.5 seconds of animation and keeps playi
   });
   await expect.poll(() => page.evaluate(() => window.fadeProgress), { timeout: 10000 }).toBeTruthy();
   const { start, progress } = await page.evaluate(() => ({ start: window.fadeStart, progress: window.fadeProgress }));
-  expect(start.time).toBeGreaterThanOrEqual(4.5 + 16 / 24);
-  expect(start.time).toBeLessThan(4.7 + 16 / 24);
+  expect(start.time).toBeGreaterThanOrEqual(4);
+  expect(start.time).toBeLessThan(4.2);
   expect(start.paused).toBe(false);
   expect(progress.paused).toBe(false);
   expect(progress.time).toBeGreaterThan(start.time + 0.1);
@@ -90,7 +90,7 @@ for (const fallback of [true, false]) {
   });
 }
 
-test('early and repeated presses preserve departure; skip never starts video', async ({ page }) => {
+test('early and repeated presses preserve transformation; skip never starts video', async ({ page }) => {
   await page.addInitScript(() => {
     window.playCalls = 0;
     const play = HTMLMediaElement.prototype.play;
@@ -99,7 +99,7 @@ test('early and repeated presses preserve departure; skip never starts video', a
   await page.goto('/unbound/');
   await page.locator('.intro-enter').dispatchEvent('click');
   await page.locator('.intro-enter').dispatchEvent('click');
-  await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'departure');
+  await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'transformation');
   await expect.poll(() => page.evaluate(() => window.playCalls)).toBe(1);
   await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'video');
   await page.keyboard.press('Escape');
@@ -140,4 +140,32 @@ test('loading deadline starts at entry and media errors reveal the homepage', as
   await page.locator('video').dispatchEvent('error');
   await page.clock.runFor(700);
   await expect(page.locator('.site-intro')).toHaveCount(0);
+});
+
+test('hiding during the transformation pauses playback and resumes the same handoff', async ({ page }) => {
+  await page.goto('/unbound/');
+  // Hide immediately on the first composited frame, before the 550 ms handoff ends.
+  await page.evaluate(() => {
+    const overlay = document.querySelector('.site-intro');
+    const observer = new MutationObserver(() => {
+      if (!overlay.classList.contains('has-video-frame')) return;
+      observer.disconnect();
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    observer.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  });
+  await page.locator('.intro-enter').click();
+  await expect(page.locator('.site-intro')).toHaveClass(/has-video-frame/);
+  await expect(page.locator('video')).toHaveJSProperty('paused', true);
+  const time = await page.locator('video').evaluate(video => video.currentTime);
+  await page.waitForTimeout(700);
+  expect(await page.locator('video').evaluate(video => video.currentTime)).toBeCloseTo(time, 1);
+  await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'transformation');
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: false });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'video');
+  await expect(page.locator('video')).toHaveJSProperty('paused', false);
 });

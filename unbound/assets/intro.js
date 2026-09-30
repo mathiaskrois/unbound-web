@@ -21,7 +21,7 @@
   const sound = overlay.querySelector('.intro-sound');
   const skip = overlay.querySelector('.intro-skip');
   logo.src = new URL('watch-icon.png?v=spring-1', base).href;
-  video.src = new URL('intro.mp4?v=glass-entrance-2', base).href;
+  video.src = new URL('intro.mp4?v=transform-1', base).href;
   document.body.append(overlay);
   document.documentElement.classList.add('intro-playing');
 
@@ -39,58 +39,98 @@
     if (video.videoHeight) video.style.width = `${height * video.videoWidth / video.videoHeight}px`;
   }
   sizeVideo();
-  let y = -height / 2 - logoSize, velocity = 0, elapsed = 0, departureTime = 0;
-  let compression = 0, compressionVelocity = 0, exitAcceleration = 0;
+  let y = -height / 2 - logoSize, velocity = 0, elapsed = 0, transformTime = 0;
+  let compression = 0, compressionVelocity = 0;
   let frame = 0, lastTime = null, accumulator = 0;
-  let loadingTimer, safetyTimer;
+  let loadingTimer, safetyTimer, videoFrame;
+  let transformStart = null;
+  let resumePlayback = false;
+  const transformDuration = .55;
+  const dissolveDuration = .18;
+  const smooth = t => t * t * (3 - 2 * t);
+  // Measured inner-symbol widths: 846/1024 in the icon, 398/540 in the video.
+  // Both symbols are centered; exclude the icon's circular backing.
+  const matchedScale = () => (846 / 1024) * logoSize / ((398 / 540) * height);
+  function beginTransformation() {
+    if (state !== 'transformation' || transformStart) return;
+    transformStart = { y: y / height, velocity: velocity / height, compression };
+    clearTimeout(loadingTimer);
+    overlay.classList.add('has-video-frame');
+  }
+  function renderArtwork() {
+    let expansion = 1, xScale = 1 + compression / 2, yScale = 1 - compression;
+    let videoScale = matchedScale();
+    if (transformStart) {
+      const t = transformTime + 1e-9 >= transformDuration ? 1 : transformTime / transformDuration;
+      const ease = smooth(t);
+      // Hermite interpolation retains the fall/hover velocity at the handoff.
+      y = height * ((2 * t ** 3 - 3 * t ** 2 + 1) * transformStart.y
+        + (t ** 3 - 2 * t ** 2 + t) * transformDuration * transformStart.velocity);
+      const squash = transformStart.compression * (1 - ease);
+      xScale = 1 + squash / 2;
+      yScale = 1 - squash;
+      videoScale += (1 - videoScale) * ease;
+      expansion = videoScale / matchedScale();
+      const dissolve = Math.min(1, transformTime / dissolveDuration);
+      logo.style.opacity = String(1 - dissolve);
+      video.style.opacity = String(dissolve);
+      // Match the brighter icon initially, then return to the source grading.
+      video.style.filter = `brightness(${1 + .6 * (1 - ease)})`;
+      logo.hidden = dissolve >= 1;
+      if (t >= 1 && state === 'transformation') {
+        setState('video');
+        enter.hidden = true;
+      }
+    }
+    logo.style.transform = `translate(-50%, -50%) translateY(${y}px) scale(${expansion * xScale}, ${expansion * yScale})`;
+    video.style.transform = `translate(-50%, -50%) translateY(${y}px) scale(${videoScale * xScale}, ${videoScale * yScale})`;
+  }
   const step = 1 / 120;
   function integrate(dt) {
     elapsed += dt;
-    if (state === 'entrance') {
+    if (state === 'entrance' || (state === 'transformation' && !transformStart)) {
       const hoverTime = Math.max(0, elapsed - 1.2);
       const blend = Math.min(1, hoverTime / 1.5);
       const target = Math.sin(hoverTime * Math.PI * 2 / 4.8) * 8 * blend * blend * (3 - 2 * blend);
       velocity += (64 * (target - y) - 12 * velocity) * dt;
       y += velocity * dt;
-      if (elapsed >= 1.2) overlay.classList.add('is-ready');
-    } else if (state === 'departure') {
-      departureTime += dt;
-      velocity -= exitAcceleration * dt;
-      y += velocity * dt;
-      if (y < -height / 2 - logoSize && departureTime >= .35) {
-        setState('video');
-        logo.hidden = true;
-        enter.hidden = true;
-      }
+      if (state === 'entrance' && elapsed + 1e-9 >= 5) overlay.classList.add('is-ready');
+      const compressionTarget = elapsed < 1.2 ? Math.min(.06, Math.max(0, y) / logoSize * .6) : 0;
+      compressionVelocity += (180 * (compressionTarget - compression) - 24 * compressionVelocity) * dt;
+      compression = Math.max(0, Math.min(.06, compression + compressionVelocity * dt));
+    } else if (state === 'transformation') {
+      transformTime += dt;
     }
-    const compressionTarget = state === 'entrance' && elapsed < 1.2 ? Math.min(.06, Math.max(0, y) / logoSize * .6) : 0;
-    compressionVelocity += (180 * (compressionTarget - compression) - 24 * compressionVelocity) * dt;
-    compression = Math.max(0, Math.min(.06, compression + compressionVelocity * dt));
   }
+
   function render(now) {
     frame = 0;
     if (state === 'completion' || document.hidden) return;
     if (lastTime !== null) accumulator += Math.min((now - lastTime) / 1000, .1);
     lastTime = now;
     while (accumulator + 1e-9 >= step) { integrate(step); accumulator -= step; }
-    logo.style.transform = `translate(-50%, -50%) translateY(${y}px) scale(${1 + compression / 2}, ${1 - compression})`;
-    // Include the MP4's 16-frame silent lead-in before counting animation time.
-    if ((state === 'video' || state === 'departure') && video.currentTime >= 4.5 + 16 / 24) finish(true);
+    renderArtwork();
+    // The source's first half-second is trimmed; retain the original fade point.
+    if ((state === 'video' || state === 'transformation') && video.currentTime >= 4) finish(true);
     else frame = requestAnimationFrame(render);
   }
   function visibilityChanged() {
     cancelAnimationFrame(frame);
     lastTime = null;
     accumulator = 0;
-    if (!document.hidden && state !== 'completion') frame = requestAnimationFrame(render);
+    if (document.hidden && state === 'transformation' && !video.paused) {
+      resumePlayback = true;
+      video.pause();
+    }
+    if (!document.hidden && state !== 'completion') {
+      if (resumePlayback) { resumePlayback = false; playWithFallback(); }
+      frame = requestAnimationFrame(render);
+    }
   }
   function syncSound() { sound.textContent = video.muted ? 'Sound on' : 'Sound off'; }
   function activate() {
     if (state !== 'entrance') return;
-    setState('departure');
-    // Reach the top in about half a second without resetting position or velocity.
-    const distance = Math.max(0, y + height / 2 + logoSize);
-    exitAcceleration = Math.max(2400, 2 * (distance + velocity * .5) / (.5 * .5));
+    setState('transformation');
     enter.disabled = true;
     sound.hidden = false;
     sound.focus({ preventScroll: true });
@@ -98,7 +138,11 @@
     syncSound();
     loadingTimer = setTimeout(() => finish(), 8000);
     safetyTimer = setTimeout(() => finish(), 30000);
+    renderArtwork();
     // This call must remain synchronous within the activation event.
+    playWithFallback();
+  }
+  function playWithFallback() {
     video.play().catch(() => {
       if (state === 'completion') return;
       video.muted = true;
@@ -124,6 +168,7 @@
     clearTimeout(loadingTimer);
     clearTimeout(safetyTimer);
     cancelAnimationFrame(frame);
+    if (videoFrame !== undefined) video.cancelVideoFrameCallback?.(videoFrame);
     if (keepPlaying !== true) video.pause();
     observer.disconnect();
     for (const [element, inert] of inertSiblings) element.inert = inert;
@@ -165,7 +210,17 @@
   viewport?.addEventListener('scroll', sizeVideo);
   video.addEventListener('ended', () => finish());
   video.addEventListener('error', () => { if (state !== 'entrance') finish(); });
-  video.addEventListener('playing', () => clearTimeout(loadingTimer));
+  video.addEventListener('playing', () => {
+    if (state !== 'transformation') return;
+    if (document.hidden) { resumePlayback = true; video.pause(); return; }
+    if (transformStart) return;
+    if ('requestVideoFrameCallback' in video) {
+      if (videoFrame !== undefined) video.cancelVideoFrameCallback(videoFrame);
+      videoFrame = video.requestVideoFrameCallback(beginTransformation);
+    } else if (video.readyState >= 2) {
+      beginTransformation();
+    }
+  });
   enter.focus({ preventScroll: true });
   frame = requestAnimationFrame(render);
 })();
