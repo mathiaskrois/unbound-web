@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-test('intro fades at 4.5 seconds of media time and keeps playing through the fade', async ({ page }) => {
+test('intro fades after the lead-in and 4.5 seconds of animation and keeps playing through the fade', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/unbound/');
   await page.getByRole('button', { name: 'Enter Unbound, play video with sound' }).click();
@@ -30,8 +30,8 @@ test('intro fades at 4.5 seconds of media time and keeps playing through the fad
   });
   await expect.poll(() => page.evaluate(() => window.fadeProgress), { timeout: 10000 }).toBeTruthy();
   const { start, progress } = await page.evaluate(() => ({ start: window.fadeStart, progress: window.fadeProgress }));
-  expect(start.time).toBeGreaterThanOrEqual(4.5);
-  expect(start.time).toBeLessThan(4.7);
+  expect(start.time).toBeGreaterThanOrEqual(4.5 + 16 / 24);
+  expect(start.time).toBeLessThan(4.7 + 16 / 24);
   expect(start.paused).toBe(false);
   expect(progress.paused).toBe(false);
   expect(progress.time).toBeGreaterThan(start.time + 0.1);

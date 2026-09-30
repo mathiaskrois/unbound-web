@@ -14,14 +14,14 @@
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', 'Welcome to Unbound');
-  overlay.innerHTML = '<video playsinline preload="auto" aria-hidden="true"></video><div class="intro-glow"></div><img class="intro-logo" alt="" aria-hidden="true"><button class="intro-enter" type="button" aria-label="Enter Unbound, play video with sound"><span class="intro-prompt">press to enter<small>Video plays with sound</small></span></button><button class="intro-sound" type="button" hidden>Sound off</button><button class="intro-skip" type="button">Skip intro</button>';
+  overlay.innerHTML = '<video playsinline preload="auto" aria-hidden="true"></video><div class="intro-glow"></div><img class="intro-logo" alt="" aria-hidden="true"><button class="intro-enter" type="button" aria-label="Enter Unbound, play video with sound"><span class="intro-prompt">press to enter</span></button><button class="intro-sound" type="button" hidden>Sound off</button><button class="intro-skip" type="button">Skip intro</button>';
   const video = overlay.querySelector('video');
   const logo = overlay.querySelector('.intro-logo');
   const enter = overlay.querySelector('.intro-enter');
   const sound = overlay.querySelector('.intro-sound');
   const skip = overlay.querySelector('.intro-skip');
   logo.src = new URL('watch-icon.png?v=spring-1', base).href;
-  video.src = new URL('intro.mp4?v=spring-1', base).href;
+  video.src = new URL('intro.mp4?v=glass-entrance-2', base).href;
   document.body.append(overlay);
   document.documentElement.classList.add('intro-playing');
 
@@ -74,7 +74,8 @@
     lastTime = now;
     while (accumulator + 1e-9 >= step) { integrate(step); accumulator -= step; }
     logo.style.transform = `translate(-50%, -50%) translateY(${y}px) scale(${1 + compression / 2}, ${1 - compression})`;
-    if ((state === 'video' || state === 'departure') && video.currentTime >= 4.5) finish(true);
+    // Include the MP4's 16-frame silent lead-in before counting animation time.
+    if ((state === 'video' || state === 'departure') && video.currentTime >= 4.5 + 16 / 24) finish(true);
     else frame = requestAnimationFrame(render);
   }
   function visibilityChanged() {
@@ -142,12 +143,14 @@
   function onKey(event) {
     if (event.key === 'Escape') { event.preventDefault(); finish(); }
     if (event.key === 'Tab') {
+      overlay.classList.add('keyboard-navigation');
       const controls = [enter, sound, skip].filter(button => !button.hidden && !button.disabled);
       const index = controls.indexOf(document.activeElement);
       event.preventDefault();
       controls[(index + (event.shiftKey ? controls.length - 1 : 1)) % controls.length].focus();
     }
   }
+  overlay.addEventListener('pointerdown', () => overlay.classList.remove('keyboard-navigation'));
   overlay.addEventListener('click', event => {
     if (!event.target.closest('.intro-skip, .intro-sound')) activate();
   });
