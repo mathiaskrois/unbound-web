@@ -169,3 +169,23 @@ test('hiding during the transformation pauses playback and resumes the same hand
   await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'video');
   await expect(page.locator('video')).toHaveJSProperty('paused', false);
 });
+
+test('mobile artwork extends beyond browser controls while buttons remain reachable', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Mobile viewport framing');
+  await page.goto('/unbound/');
+  await expect(page.locator('meta[name=viewport]')).toHaveAttribute('content', /viewport-fit=cover/);
+  const dimensions = await page.evaluate(() => {
+    const visibleHeight = visualViewport.height - 120;
+    Object.defineProperty(visualViewport, 'height', { configurable: true, value: visibleHeight });
+    visualViewport.dispatchEvent(new Event('resize'));
+    const overlay = document.querySelector('.site-intro');
+    return { visibleHeight, artworkHeight: overlay.getBoundingClientRect().height, buttonBottom: overlay.querySelector('.intro-skip').getBoundingClientRect().bottom };
+  });
+  expect(dimensions.artworkHeight).toBeGreaterThan(dimensions.visibleHeight + 100);
+  expect(dimensions.buttonBottom).toBeLessThanOrEqual(dimensions.visibleHeight);
+  await page.locator('.intro-enter').tap();
+  await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'video');
+  expect(await page.locator('video').evaluate(v => parseFloat(v.style.width))).toBeCloseTo(dimensions.artworkHeight, 1);
+  await page.getByRole('button', { name: 'Skip intro' }).click();
+  await expect(page.locator('meta[name=viewport]')).toHaveAttribute('content', 'width=device-width, initial-scale=1');
+});

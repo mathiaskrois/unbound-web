@@ -7,6 +7,11 @@
     sessionStorage.setItem('unbound-intro-seen', '1');
   } catch { /* Entrance also works without storage. */ }
 
+  const viewportMeta = document.querySelector('meta[name=viewport]');
+  const originalViewport = viewportMeta?.getAttribute('content');
+  if (viewportMeta && !originalViewport.includes('viewport-fit')) {
+    viewportMeta.setAttribute('content', `${originalViewport}, viewport-fit=cover`);
+  }
   const base = new URL(document.currentScript.src);
   const previousFocus = document.activeElement;
   const overlay = document.createElement('div');
@@ -29,6 +34,10 @@
   const setState = next => { state = next; overlay.dataset.state = next; };
   setState(state);
   const viewport = window.visualViewport;
+  const viewportMeasure = document.createElement('span');
+  viewportMeasure.className = 'intro-viewport-measure';
+  viewportMeasure.setAttribute('aria-hidden', 'true');
+  overlay.append(viewportMeasure);
   const coarsePointer = matchMedia('(any-pointer: coarse)');
   let height, logoSize, aspectRatio = 16 / 9;
   let targetHeight, targetAngle, framing = null;
@@ -57,7 +66,9 @@
   function sizeVideo() {
     const oldHeight = height;
     const width = viewport ? viewport.width : innerWidth;
-    height = viewport ? viewport.height : innerHeight;
+    const visibleHeight = viewport ? viewport.height : innerHeight;
+    const mobile = coarsePointer.matches && width <= 900;
+    height = mobile ? Math.max(visibleHeight, viewportMeasure.offsetHeight) : visibleHeight;
     logoSize = Math.min(240, Math.max(140, innerWidth * .22));
     if (video.videoHeight) aspectRatio = video.videoWidth / video.videoHeight;
     const rotated = coarsePointer.matches && width <= 900 && height > width;
@@ -66,7 +77,9 @@
     const changed = targetAngle !== nextAngle || targetHeight !== nextHeight;
     targetAngle = nextAngle;
     targetHeight = nextHeight;
-    overlay.style.top = `${viewport ? viewport.offsetTop : 0}px`;
+    overlay.style.top = `${mobile ? 0 : (viewport ? viewport.offsetTop : 0)}px`;
+    const obscuredBottom = mobile ? Math.max(0, height - visibleHeight - (viewport?.offsetTop || 0)) : 0;
+    overlay.style.setProperty('--intro-controls-bottom', `${obscuredBottom + 24}px`);
     overlay.style.height = `${height}px`;
     if (changed && transformStart && state !== 'completion') {
       // Retarget from the displayed pose, even if an earlier turn is unfinished.
@@ -210,6 +223,7 @@
     overlay.classList.add('is-finished');
     overlay.inert = true;
     document.documentElement.classList.remove('intro-playing');
+    if (viewportMeta) viewportMeta.setAttribute('content', originalViewport);
     document.removeEventListener('keydown', onKey);
     document.removeEventListener('visibilitychange', visibilityChanged);
     window.removeEventListener('resize', sizeVideo);

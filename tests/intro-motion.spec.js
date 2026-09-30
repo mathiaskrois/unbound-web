@@ -94,7 +94,7 @@ test('five-second prompt excludes hidden time; handoff waits for a frame and sha
     advance(44);
     const rotated = matchMedia('(any-pointer: coarse)').matches && visualViewport.width <= 900 && visualViewport.height > visualViewport.width;
     const finalWidth = parseFloat(video.style.width);
-    const expectedWidth = rotated ? visualViewport.height : visualViewport.height * video.videoWidth / video.videoHeight;
+    const expectedWidth = rotated ? parseFloat(overlay.style.height) : parseFloat(overlay.style.height) * video.videoWidth / video.videoHeight;
     const angle = Math.atan2(new DOMMatrix(getComputedStyle(video).transform).b, new DOMMatrix(getComputedStyle(video).transform).a) * 180 / Math.PI;
     const end = { rotated, finalWidth, expectedWidth, angle, state: overlay.dataset.state, opacity: video.style.opacity, transform: video.style.transform };
     return { beforeFive, afterHidden, atFive, beforePress, afterPress, waiting, alignment, dissolved, end };

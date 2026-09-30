@@ -9,7 +9,7 @@
 /* Layered cyan highlights and deep blue refraction echo the round glass logo. */
 .intro-prompt { position: absolute; top: calc(50% + clamp(70px, 11vw, 120px) + 32px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", system-ui, sans-serif; font-size: clamp(26px, 3.4vw, 38px); font-weight: 900; line-height: 1.25; letter-spacing: -.035em; color: #27caff; background: linear-gradient(175deg, #ecffff 5%, #8ef5ff 19%, #20cfff 35%, #0070cf 49%, #083a80 54%, #04a8ff 66%, #7eefff 79%, #0871cb 95%); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: .5px #67dfffaa; filter: drop-shadow(0 1px 0 #06335f) drop-shadow(0 2px 1px #0079cf88) drop-shadow(0 0 9px #008dff66); opacity: 0; transition: opacity .5s ease; }
 .is-ready .intro-prompt { opacity: 1; }
-.site-intro .intro-skip, .site-intro .intro-sound { position: absolute; right: 24px; bottom: max(24px, env(safe-area-inset-bottom)); padding: 10px 16px; border: 1px solid #ffffff60; border-radius: 24px; background: #111b; }
+.site-intro .intro-skip, .site-intro .intro-sound { position: absolute; right: 24px; bottom: max(var(--intro-controls-bottom, 24px), env(safe-area-inset-bottom)); padding: 10px 16px; border: 1px solid #ffffff60; border-radius: 24px; background: #111b; }
 .site-intro .intro-sound { left: 24px; right: auto; }
 .site-intro [hidden] { display: none; }
 .site-intro[data-state="transformation"] .intro-glow, .site-intro[data-state="video"] .intro-glow { opacity: 0; }
@@ -21,3 +21,5 @@ html.intro-playing { overflow: hidden; }
 .site-intro .intro-enter:disabled { pointer-events: none; }
 .site-intro .intro-enter:focus-visible { outline: none; }
 .keyboard-navigation .intro-enter:focus-visible .intro-prompt { text-decoration: underline; text-decoration-color: #8edaff; text-decoration-thickness: 2px; text-underline-offset: 8px; }
+
+.intro-viewport-measure { position: absolute; width: 0; height: 100vh; height: 100lvh; visibility: hidden; pointer-events: none; }
