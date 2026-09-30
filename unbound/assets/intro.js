@@ -8,9 +8,14 @@
 
   const overlay = document.createElement('div');
   overlay.className = 'site-intro';
-  overlay.innerHTML = '<video muted playsinline preload="auto" aria-hidden="true"></video><img hidden aria-hidden="true" alt=""><button type="button">Skip intro</button>';
+  overlay.innerHTML = '<video muted playsinline preload="auto" aria-hidden="true"></video><img hidden aria-hidden="true" alt=""><button class="intro-sound" type="button">Sound on</button><button class="intro-skip" type="button">Skip intro</button>';
   const video = overlay.querySelector('video');
   const fallback = overlay.querySelector('img');
+  const soundButton = overlay.querySelector('.intro-sound');
+  soundButton.addEventListener('click', () => {
+    video.muted = !video.muted;
+    soundButton.textContent = video.muted ? 'Sound on' : 'Sound off';
+  });
   const introBase = new URL(document.currentScript.src);
   video.muted = true;
   video.src = new URL('intro.mp4', introBase).href;
@@ -30,6 +35,7 @@
     }
   }
   function useGifFallback() {
+    soundButton.hidden = true;
     video.style.display = 'none';
     fallback.src = new URL('intro.gif', introBase).href;
     fallback.hidden = false;
@@ -75,9 +81,13 @@
     }, 650);
   }
   function onKey(event) {
-    if (event.key === 'Escape' || event.key === 'Tab') finish();
+    if (event.key === 'Escape') finish();
+    if (event.key === 'Tab' && !overlay.contains(document.activeElement)) {
+      event.preventDefault();
+      (soundButton.hidden ? overlay.querySelector('.intro-skip') : soundButton).focus();
+    }
   }
-  overlay.querySelector('button').addEventListener('click', finish);
+  overlay.querySelector('.intro-skip').addEventListener('click', finish);
   document.addEventListener('keydown', onKey);
   motion.addEventListener('change', finish);
   video.addEventListener('ended', finish);
