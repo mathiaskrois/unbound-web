@@ -35,7 +35,7 @@
     fallback.hidden = false;
     fallback.addEventListener('load', sizeVideo, { once: true });
     sizeVideo();
-    setTimeout(finish, 4250);
+    setTimeout(finish, 4500);
   }
   sizeVideo();
   video.addEventListener('loadedmetadata', sizeVideo);
@@ -45,13 +45,21 @@
   let finished = false;
   let loadingTimer;
   let safetyTimer;
-  let fadeTimer;
+  let playbackFrame;
+  function checkPlayback() {
+    if (finished) return;
+    if (video.currentTime >= 4.5) {
+      finish(true);
+    } else {
+      playbackFrame = requestAnimationFrame(checkPlayback);
+    }
+  }
   function finish(keepPlaying = false) {
     if (finished) return;
     finished = true;
     clearTimeout(loadingTimer);
     clearTimeout(safetyTimer);
-    clearTimeout(fadeTimer);
+    cancelAnimationFrame(playbackFrame);
     if (keepPlaying !== true) video.pause();
     video.removeEventListener('loadedmetadata', sizeVideo);
     window.removeEventListener('resize', sizeVideo);
@@ -61,7 +69,10 @@
     document.documentElement.classList.remove('intro-playing');
     document.removeEventListener('keydown', onKey);
     motion.removeEventListener('change', finish);
-    setTimeout(() => overlay.remove(), 1250);
+    setTimeout(() => {
+      video.pause();
+      overlay.remove();
+    }, 650);
   }
   function onKey(event) {
     if (event.key === 'Escape' || event.key === 'Tab') finish();
@@ -73,8 +84,8 @@
   video.addEventListener('error', useGifFallback);
   video.addEventListener('playing', () => {
     clearTimeout(loadingTimer);
-    // Fade shortly into the fifth second while playback continues to its final frame.
-    fadeTimer = setTimeout(() => finish(true), 4250);
+    // Use media time so buffering cannot start the fade early.
+    playbackFrame = requestAnimationFrame(checkPlayback);
   }, { once: true });
   loadingTimer = setTimeout(finish, 5000);
   safetyTimer = setTimeout(finish, 30000);
