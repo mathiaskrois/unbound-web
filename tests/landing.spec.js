@@ -23,6 +23,10 @@ test('experience navigation and own-file Watch walkthrough', async ({ page }) =>
   expect(results.violations).toEqual([]);
 });
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('unbound-intro-seen', '1'));
+});
+
 async function jump(page, y) {
   await page.evaluate(y => window.scrollTo({ top: y, behavior: 'instant' }), y);
   await page.waitForTimeout(800);

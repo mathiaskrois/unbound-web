@@ -1,8 +1,23 @@
-.site-intro { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; overflow: hidden; background: #000; opacity: 1; transition: opacity 0.6s ease; }
-.site-intro video { position: absolute; top: 0; left: 50%; height: 100vh; height: 100dvh; width: auto; max-width: none; max-height: none; transform: translateX(-50%); }
-.site-intro img { position: absolute; top: 0; left: 50%; height: 100%; width: auto; max-width: none; transform: translateX(-50%); }
-.site-intro button { position: absolute; right: 24px; bottom: max(24px, env(safe-area-inset-bottom)); padding: 10px 16px; border: 1px solid #ffffff60; border-radius: 24px; background: #111; color: #fff; font: inherit; cursor: pointer; }
-.site-intro.is-finished { opacity: 0; pointer-events: none; }
+.site-intro { position: fixed; inset: 0; bottom: auto; z-index: 10000; overflow: hidden; background: #000; opacity: 1; transition: opacity .6s ease; }
+.site-intro video { position: absolute; top: 0; left: 50%; height: 100dvh; width: auto; max-width: none; max-height: none; transform: translateX(-50%); }
+.site-intro[data-state="entrance"] video { visibility: hidden; }
+.intro-glow { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #137ab525, transparent 55%); transition: opacity .5s ease; pointer-events: none; }
+.site-intro .intro-logo { position: absolute; top: 50%; left: 50%; width: clamp(140px, 22vw, 240px); height: auto; border-radius: 50%; transform: translate(-50%, -150vh); will-change: transform; pointer-events: none; }
+.site-intro button { font: inherit; cursor: pointer; color: #fff; }
+.site-intro button:focus-visible { outline: 2px solid #8edaff; outline-offset: -5px; }
+.site-intro .intro-enter { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+.intro-prompt { position: absolute; top: calc(50% + clamp(70px, 11vw, 120px) + 32px); left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 13px 24px; border: 1px solid #b5ddff26; border-radius: 18px; background: #b8ddff0a; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: #ffffffde; font-size: 19px; letter-spacing: .07em; text-shadow: 0 0 18px #8edaff44; opacity: 0; transition: opacity .5s ease; }
+.intro-prompt small { display: block; margin-top: 8px; font-size: 11px; letter-spacing: .03em; color: #ffffffa6; }
+.is-ready .intro-prompt { opacity: 1; }
+.site-intro .intro-skip, .site-intro .intro-sound { position: absolute; right: 24px; bottom: max(24px, env(safe-area-inset-bottom)); padding: 10px 16px; border: 1px solid #ffffff60; border-radius: 24px; background: #111b; }
 .site-intro .intro-sound { left: 24px; right: auto; }
+.site-intro [hidden] { display: none; }
+.site-intro[data-state="departure"] .intro-glow, .site-intro[data-state="video"] .intro-glow { opacity: 0; }
+.site-intro.is-finished { opacity: 0; pointer-events: none; }
 html.intro-playing { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .site-intro { display: none; transition: none; } }
+
+.site-intro[data-state="departure"] .intro-prompt { opacity: 0; }
+.site-intro .intro-enter:disabled { pointer-events: none; }
+.site-intro .intro-enter:focus-visible { outline: none; }
+.intro-enter:focus-visible .intro-prompt { outline: 2px solid #8edaff; outline-offset: 4px; }
