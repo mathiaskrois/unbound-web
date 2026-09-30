@@ -35,7 +35,7 @@
     fallback.hidden = false;
     fallback.addEventListener('load', sizeVideo, { once: true });
     sizeVideo();
-    setTimeout(finish, 5000);
+    setTimeout(finish, 4000);
   }
   sizeVideo();
   video.addEventListener('loadedmetadata', sizeVideo);
@@ -45,11 +45,13 @@
   let finished = false;
   let loadingTimer;
   let safetyTimer;
+  let fadeTimer;
   function finish() {
     if (finished) return;
     finished = true;
     clearTimeout(loadingTimer);
     clearTimeout(safetyTimer);
+    clearTimeout(fadeTimer);
     video.pause();
     video.removeEventListener('loadedmetadata', sizeVideo);
     window.removeEventListener('resize', sizeVideo);
@@ -69,7 +71,11 @@
   motion.addEventListener('change', finish);
   video.addEventListener('ended', finish);
   video.addEventListener('error', useGifFallback);
-  video.addEventListener('playing', () => clearTimeout(loadingTimer), { once: true });
+  video.addEventListener('playing', () => {
+    clearTimeout(loadingTimer);
+    // Fade as the fifth second begins, instead of holding the page until playback ends.
+    fadeTimer = setTimeout(finish, 4000);
+  }, { once: true });
   loadingTimer = setTimeout(finish, 5000);
   safetyTimer = setTimeout(finish, 30000);
   video.play().catch(finish);
