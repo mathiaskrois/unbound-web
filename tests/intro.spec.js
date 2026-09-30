@@ -160,7 +160,12 @@ test('hiding during the transformation pauses playback and resumes the same hand
   await expect(page.locator('video')).toHaveJSProperty('paused', true);
   const time = await page.locator('video').evaluate(video => video.currentTime);
   await page.waitForTimeout(700);
-  expect(await page.locator('video').evaluate(video => video.currentTime)).toBeCloseTo(time, 1);
+  // WebKit may revise its initial audio-clock estimate backwards after pausing.
+  const stoppedTime = await page.locator('video').evaluate(video => video.currentTime);
+  expect(stoppedTime).toBeLessThanOrEqual(time + .05);
+  await expect(page.locator('video')).toHaveJSProperty('paused', true);
+  await page.waitForTimeout(200);
+  expect(await page.locator('video').evaluate(video => video.currentTime)).toBeCloseTo(stoppedTime, 2);
   await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'transformation');
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: false });
@@ -170,22 +175,45 @@ test('hiding during the transformation pauses playback and resumes the same hand
   await expect(page.locator('video')).toHaveJSProperty('paused', false);
 });
 
-test('mobile artwork extends beyond browser controls while buttons remain reachable', async ({ page, isMobile }) => {
-  test.skip(!isMobile, 'Mobile viewport framing');
-  await page.goto('/unbound/');
-  await expect(page.locator('meta[name=viewport]')).toHaveAttribute('content', /viewport-fit=cover/);
-  const dimensions = await page.evaluate(() => {
-    const visibleHeight = visualViewport.height - 120;
-    Object.defineProperty(visualViewport, 'height', { configurable: true, value: visibleHeight });
-    visualViewport.dispatchEvent(new Event('resize'));
-    const overlay = document.querySelector('.site-intro');
-    return { visibleHeight, artworkHeight: overlay.getBoundingClientRect().height, buttonBottom: overlay.querySelector('.intro-skip').getBoundingClientRect().bottom };
+for (const standalone of [false, true]) {
+  test(`mobile ${standalone ? 'standalone' : 'browser'} framing masks the page behind browser controls`, async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Mobile viewport framing');
+    if (standalone) await page.addInitScript(() => Object.defineProperty(navigator, 'standalone', { value: true }));
+    await page.goto('/unbound/');
+    const dimensions = await page.evaluate(() => {
+      const visibleHeight = visualViewport.height - 120;
+      Object.defineProperty(visualViewport, 'height', { configurable: true, value: visibleHeight });
+      Object.defineProperty(visualViewport, 'offsetTop', { configurable: true, value: 30 });
+      visualViewport.dispatchEvent(new Event('resize'));
+      const overlay = document.querySelector('.site-intro');
+      const box = overlay.getBoundingClientRect();
+      const backdrop = getComputedStyle(overlay, '::before');
+      return { visibleHeight, stageHeight: box.height, stageTop: box.top,
+        artworkHeight: overlay.querySelector('.intro-viewport-measure').offsetHeight,
+        buttonBottom: overlay.querySelector('.intro-skip').getBoundingClientRect().bottom,
+        backdropTop: parseFloat(backdrop.top), backdropBottom: parseFloat(backdrop.bottom),
+        pageVisibility: getComputedStyle(document.querySelector('main')).visibility,
+        rootColor: getComputedStyle(document.documentElement).backgroundColor };
+    });
+    expect(dimensions.stageHeight).toBeCloseTo(standalone ? dimensions.artworkHeight : dimensions.visibleHeight, 1);
+    expect(dimensions.stageTop).toBeCloseTo(standalone ? 0 : 30, 1);
+    expect(dimensions.buttonBottom).toBeLessThanOrEqual(dimensions.visibleHeight + 30);
+    expect(dimensions.backdropTop).toBeLessThan(-100);
+    expect(dimensions.backdropBottom).toBeLessThan(-100);
+    expect(dimensions.pageVisibility).toBe('hidden');
+    expect(dimensions.rootColor).toBe('rgb(0, 0, 0)');
+    await page.locator('.intro-enter').tap();
+    await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'video');
+    const video = await page.locator('video').evaluate(v => {
+      const box = v.getBoundingClientRect();
+      return { width: parseFloat(v.style.width), center: box.top + box.height / 2 };
+    });
+    expect(video.width).toBeCloseTo(dimensions.artworkHeight, 1);
+    expect(video.center).toBeCloseTo(dimensions.stageTop + dimensions.stageHeight / 2, 1);
+    await page.getByRole('button', { name: 'Skip intro' }).click();
+    await expect(page.locator('.site-intro')).toHaveCount(0);
+    await expect(page.locator('main')).toBeVisible();
+    await expect(page.locator('meta[name=viewport]')).toHaveAttribute('content', 'width=device-width, initial-scale=1');
+    await expect(page.locator('meta[name=theme-color]')).toHaveAttribute('content', '#0b0d16');
   });
-  expect(dimensions.artworkHeight).toBeGreaterThan(dimensions.visibleHeight + 100);
-  expect(dimensions.buttonBottom).toBeLessThanOrEqual(dimensions.visibleHeight);
-  await page.locator('.intro-enter').tap();
-  await expect(page.locator('.site-intro')).toHaveAttribute('data-state', 'video');
-  expect(await page.locator('video').evaluate(v => parseFloat(v.style.width))).toBeCloseTo(dimensions.artworkHeight, 1);
-  await page.getByRole('button', { name: 'Skip intro' }).click();
-  await expect(page.locator('meta[name=viewport]')).toHaveAttribute('content', 'width=device-width, initial-scale=1');
-});
+}

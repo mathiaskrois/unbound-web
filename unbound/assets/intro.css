@@ -1,4 +1,4 @@
-.site-intro { position: fixed; inset: 0; bottom: auto; z-index: 10000; overflow: hidden; background: #000; opacity: 1; transition: opacity .6s ease; }
+.site-intro { position: fixed; inset: 0; bottom: auto; z-index: 10000; overflow: visible; background: #000; opacity: 1; transition: opacity .6s ease; }
 .site-intro video { position: absolute; top: 50%; left: 50%; height: 100dvh; width: auto; max-width: none; max-height: none; transform: translate(-50%, -50%); opacity: 0; will-change: transform, opacity; }
 .site-intro[data-state="entrance"] video { visibility: hidden; }
 .intro-glow { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #137ab525, transparent 55%); transition: opacity .12s ease; pointer-events: none; }
@@ -23,3 +23,8 @@ html.intro-playing { overflow: hidden; }
 .keyboard-navigation .intro-enter:focus-visible .intro-prompt { text-decoration: underline; text-decoration-color: #8edaff; text-decoration-thickness: 2px; text-underline-offset: 8px; }
 
 .intro-viewport-measure { position: absolute; width: 0; height: 100vh; height: 100lvh; visibility: hidden; pointer-events: none; }
+
+/* Cover Safari's obscured areas independently of the visible, centered stage. */
+.site-intro::before { content: ""; position: fixed; inset: -100vh 0; background: #000; z-index: -1; pointer-events: none; }
+html.intro-playing, html.intro-playing body { background: #000 !important; overscroll-behavior: none; }
+html.intro-playing body > :not(.site-intro) { visibility: hidden !important; }

@@ -7,6 +7,10 @@
     sessionStorage.setItem('unbound-intro-seen', '1');
   } catch { /* Entrance also works without storage. */ }
 
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const themeMeta = document.querySelector('meta[name=theme-color]');
+  const originalTheme = themeMeta?.getAttribute('content');
+  themeMeta?.setAttribute('content', '#000000');
   const viewportMeta = document.querySelector('meta[name=viewport]');
   const originalViewport = viewportMeta?.getAttribute('content');
   if (viewportMeta && !originalViewport.includes('viewport-fit')) {
@@ -39,7 +43,7 @@
   viewportMeasure.setAttribute('aria-hidden', 'true');
   overlay.append(viewportMeasure);
   const coarsePointer = matchMedia('(any-pointer: coarse)');
-  let height, logoSize, aspectRatio = 16 / 9;
+  let height, artworkHeight, logoSize, aspectRatio = 16 / 9;
   let targetHeight, targetAngle, framing = null;
   let renderedHeight = 0, renderedAngle = 0;
   let y = 0, velocity = 0, elapsed = 0, transformTime = 0;
@@ -68,16 +72,18 @@
     const width = viewport ? viewport.width : innerWidth;
     const visibleHeight = viewport ? viewport.height : innerHeight;
     const mobile = coarsePointer.matches && width <= 900;
-    height = mobile ? Math.max(visibleHeight, viewportMeasure.offsetHeight) : visibleHeight;
+    artworkHeight = mobile ? Math.max(visibleHeight, viewportMeasure.offsetHeight) : visibleHeight;
+    // Safari's controls define the stage center, independently of the bleeding video.
+    height = mobile && standalone ? artworkHeight : visibleHeight;
     logoSize = Math.min(240, Math.max(140, innerWidth * .22));
     if (video.videoHeight) aspectRatio = video.videoWidth / video.videoHeight;
     const rotated = coarsePointer.matches && width <= 900 && height > width;
     const nextAngle = rotated ? -90 : 0;
-    const nextHeight = rotated ? height / aspectRatio : height;
+    const nextHeight = rotated ? artworkHeight / aspectRatio : artworkHeight;
     const changed = targetAngle !== nextAngle || targetHeight !== nextHeight;
     targetAngle = nextAngle;
     targetHeight = nextHeight;
-    overlay.style.top = `${mobile ? 0 : (viewport ? viewport.offsetTop : 0)}px`;
+    overlay.style.top = `${mobile && standalone ? 0 : (viewport ? viewport.offsetTop : 0)}px`;
     const obscuredBottom = mobile ? Math.max(0, height - visibleHeight - (viewport?.offsetTop || 0)) : 0;
     overlay.style.setProperty('--intro-controls-bottom', `${obscuredBottom + 24}px`);
     overlay.style.height = `${height}px`;
@@ -223,7 +229,7 @@
     overlay.classList.add('is-finished');
     overlay.inert = true;
     document.documentElement.classList.remove('intro-playing');
-    if (viewportMeta) viewportMeta.setAttribute('content', originalViewport);
+
     document.removeEventListener('keydown', onKey);
     document.removeEventListener('visibilitychange', visibilityChanged);
     window.removeEventListener('resize', sizeVideo);
@@ -233,7 +239,13 @@
     coarsePointer.removeEventListener('change', sizeVideo);
     const target = previousFocus !== document.body && previousFocus?.isConnected ? previousFocus : document.querySelector('.brand');
     target?.focus({ preventScroll: true });
-    setTimeout(() => { video.pause(); overlay.remove(); }, 650);
+    setTimeout(() => {
+      video.pause();
+      overlay.remove();
+      // Avoid changing Safari's layout viewport partway through the final fade.
+      if (viewportMeta) viewportMeta.setAttribute('content', originalViewport);
+      if (themeMeta) themeMeta.setAttribute('content', originalTheme);
+    }, 650);
   }
   function onKey(event) {
     if (event.key === 'Escape') { event.preventDefault(); finish(); }
