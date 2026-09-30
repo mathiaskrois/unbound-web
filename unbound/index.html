@@ -10,14 +10,18 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://krois.dk/unbound/">
   <link rel="canonical" href="https://krois.dk/unbound/">
-  <link rel="icon" type="image/webp" href="assets/app-icon.webp">
+  <link rel="icon" href="assets/favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" href="assets/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
   <link rel="preload" as="image" href="assets/library-dark.webp">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="stylesheet" href="assets/landing.css">
+  <link rel="stylesheet" href="assets/devices.css">
+  <link rel="stylesheet" href="assets/home.css">
   <script src="assets/landing.js" defer></script>
   <title>Unbound — Make room for a good story</title>
 </head>
-<body class="landing">
+<body class="landing home-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header"><div class="shell landing-nav">
     <a class="brand" href="./" aria-label="Unbound home"><img src="assets/app-icon.webp" width="32" height="32" alt="">unbound</a>
@@ -28,10 +32,10 @@
       <div class="chapter chapter-intro" data-chapter="0">
         <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Your files. Your freedom.</p>
         <h1>Your audio.<br>On your <span>Watch.</span></h1>
-        <p class="chapter-copy">Bring your own MP3s. Transfer them to Apple Watch with Unbound Pro. Listen offline, with your iPhone left at home.</p>
+        <p class="chapter-copy">A home for your MP3 audiobooks. A little freedom for you. Take your library offline on Apple Watch with Unbound Pro, and leave your iPhone behind.</p>
         <a class="primary-link" href="experience/">Explore the experience <span aria-hidden="true">↗</span></a>
         <p class="platform-note">Made for iPhone, iPad &amp; Apple Watch.</p>
-        <div class="scroll-cue" aria-hidden="true"><span></span> Scroll to find your escape</div>
+        <a class="scroll-cue" href="#your-library"><span aria-hidden="true">↓</span> A little more Unbound</a>
       </div>
       <figure class="device-scene" aria-label="Unbound’s Library screen on iPhone alongside an illustrated Mini Player on Apple Watch">
         <div class="scene-atmosphere" aria-hidden="true"><div class="scene-glow"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div></div>
@@ -47,28 +51,28 @@
               <div class="watch-now"><span class="tiny-wave"><i></i><i></i><i></i><i></i><i></i></span> MINI PLAYER</div>
               <div class="watch-title">The Secret<br>Garden</div><div class="watch-author">Frances Hodgson Burnett</div>
               <div class="watch-progress"><span></span></div><div class="watch-times"><span>12:48</span><span>22:04</span></div>
-              <div class="watch-controls"><span class="skip-transport">↶<small>15</small></span><span class="watch-play"><i></i><i></i></span><span class="skip-transport">↷<small>30</small></span></div>
+              <div class="watch-controls"><span class="skip-transport"><svg viewBox="0 0 30 30"><path d="M8 7a10 10 0 1 1-3 7M8 3v5H3"/></svg><small>15</small></span><span class="watch-play"><i></i><i></i></span><span class="skip-transport"><svg viewBox="0 0 30 30"><path d="M22 7a10 10 0 1 0 3 7M22 3v5h5"/></svg><small>30</small></span></div>
             </div></div>
           </div>
         </div>
-        <figcaption class="scene-caption"><span class="caption-line"></span> A whole library. A little freedom.</figcaption>
+        <figcaption class="scene-caption"><span class="caption-line"></span> A whole library. A little freedom.<small>iPhone app preview · Watch player illustration</small></figcaption>
         <button class="motion-toggle" type="button" aria-pressed="false" hidden><span aria-hidden="true">Ⅱ</span> <span class="motion-label">Pause motion</span></button>
       </figure>
       <div class="chapter" id="your-library" data-chapter="1">
         <p class="eyebrow"><span class="chapter-number">01 /</span> All yours</p>
-        <h2>Your books.<br>Your <span>own little<br>world.</span></h2>
+        <h2>Your books.<br>Your <span>own little world.</span></h2>
         <p class="chapter-copy">Bring your MP3 audiobooks. Give them a home. Organise your library, save a favourite moment, and pick up right where the story left you.</p>
         <div class="chapter-detail"><span aria-hidden="true">↳</span> Import. Organise. Get lost.</div>
       </div>
       <div class="chapter" id="on-your-wrist" data-chapter="2">
         <p class="eyebrow"><span class="chapter-number">02 /</span> A little more freedom <span class="pro-tag">PRO</span></p>
-        <h2>Leave your<br>phone.<br><span>Take the story.</span></h2>
-        <p class="chapter-copy">Your audiobook downloads. Your saved lectures. Your own MP3 files. Transfer them from iPhone to Apple Watch with Unbound Pro, connect your headphones, and head out. Once transferred, no phone or internet connection is needed to play them.</p>
+        <h2>Leave your phone.<br><span>Take the story.</span></h2>
+        <p class="chapter-copy">Audiobooks, saved lectures, your own MP3s. Transfer them to Apple Watch with Unbound Pro, connect your headphones, and head out. Once transferred, listen without your phone or an internet connection.</p>
         <div class="chapter-detail"><span class="tiny-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span> Your next chapter is already with you.</div>
       </div>
     </section>
     <section class="essentials" id="features" aria-labelledby="essentials-title"><div class="shell">
-      <div class="section-heading" data-reveal><p class="eyebrow">Thoughtfully simple</p><h2 id="essentials-title">Everything you need.<br><span>Nothing in your way.</span></h2><p>A few good tools. More room for the story.</p></div>
+      <div class="section-heading" data-reveal><p class="eyebrow">Made for listening</p><h2 id="essentials-title">Everything you need.<br><span>Nothing in your way.</span></h2><p>A few good tools.<br> More room for the story.</p></div>
       <div class="essential-grid">
         <article class="essential-card" data-reveal><div class="feature-art library-art" aria-hidden="true"><div class="book book-one"></div><div class="book book-two"></div><div class="book book-three"></div><span class="bookmark-mark">+</span></div><p class="feature-label">A library that feels like you</p><h3>Bring your own world.</h3><p>Import MP3s, create folders, and keep your favourites close. Your collection, beautifully in order.</p></article>
         <article class="essential-card" data-reveal><div class="feature-art pace-art" aria-hidden="true"><span>0.75×</span><strong>1.25×</strong><span>2×</span><div class="pace-ticks"></div></div><p class="feature-label">On your terms</p><h3>Find your rhythm.</h3><p>Set the speed. Bookmark a thought. Drift off with a sleep timer. Make every listen your own.</p></article>

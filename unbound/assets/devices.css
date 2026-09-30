@@ -1,0 +1,156 @@
+/* Shared product hardware. Real library capture; illustrated Watch player.
+   Materials are static layers; landing.js animates only the device transforms. */
+.device-scene { grid-template-rows: minmax(0, 1fr); }
+.scene-atmosphere .orbit { display: none; }
+
+/* A thin machined enclosure, a dark gasket, and uninterrupted edge-to-edge glass. */
+.phone { height: 577px; }
+.phone::before {
+  content: "";
+  position: absolute;
+  inset: 1px -7px -2px 5px;
+  border-radius: 45px;
+  background: linear-gradient(90deg, #121319 88%, #7a7981 94%, #292a31 98%, #b6b4bc);
+  box-shadow: 14px 18px 24px #0005, 35px 48px 60px #0006;
+}
+.phone-rim {
+  position: relative;
+  padding: 5px;
+  border: 1px solid #a4a2ac;
+  border-radius: 44px;
+  background: linear-gradient(125deg, #e5e4e9 0%, #929099 5%, #36363e 19%, #15161d 43%, #66646d 79%, #c0bdc6 94%, #40404a);
+  box-shadow: inset 0 0 0 1px #d5d3df66, inset -2px -1px 2px #000a, 1px 0 0 #f2eaff55;
+}
+.phone-screen { position: relative; border: 2px solid #05060a; border-radius: 38px; }
+.phone-screen img { object-fit: cover; }
+.phone-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(112deg, #e9edff0d, transparent 24%, transparent 76%, #d8dcff04);
+  box-shadow: inset 1px 1px 2px #ffffff26, inset -1px 0 2px #d0d2ee14;
+}
+.phone-button { left: -3px; width: 3px; background: linear-gradient(90deg, #28292f, #bab7bf 50%, #45434e); border-top: 1px solid #d4d1d8; box-shadow: -1px 1px 2px #0009; }
+.phone-button-one { top: 91px; height: 18px; }
+.phone-button-two { top: 131px; height: 37px; }
+.phone-button-three { top: 178px; height: 37px; }
+.phone-rim::before, .phone-rim::after { content: ""; position: absolute; right: -4px; width: 5px; height: 3px; background: #22232b; border-block: 1px solid #96939c55; }
+.phone-rim::before { top: 55px; }
+.phone-rim::after { bottom: 54px; }
+
+/* Polished graphite case: the narrow metal lip catches the studio light,
+   while the curved cover glass stays almost black around the display. */
+.watch { width: 192px; height: 232px; transform-style: flat; }
+.watch-case {
+  padding: 5px;
+  border-radius: 49px;
+  border: 1px solid #b9b6c0;
+  background: linear-gradient(130deg, #dddce1 0%, #77757f 9%, #d0ccd4 13%, #494751 23%, #24242d 47%, #16171e 64%, #8a8693 85%, #d5d0d9 94%, #65616d);
+  box-shadow: inset 0 0 0 1px #f3eaff4d, inset 2px 2px 3px #ffffff47, inset -1px -2px 2px #000b, 1px 0 0 #272730, 3px 1px 0 #92909b, 6px 2px 0 #474550, 8px 3px 0 #171820, 12px 8px 12px #0006, 23px 30px 34px #0007;
+}
+.watch-case::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 44px;
+  pointer-events: none;
+  background: linear-gradient(132deg, #fff0 4%, #f6f2ff14 10%, #fff0 27%, #fff0 68%, #d9d2f507 88%, #fff0);
+  box-shadow: inset 1px 1px 2px #ffffff66, inset -1px -1px 2px #e6ddff24;
+}
+.watch-screen {
+  position: relative;
+  padding: 14px 13px 10px;
+  border: 4px solid #050507;
+  border-radius: 43px;
+  background: radial-gradient(ellipse at 30% 0, #15141b 0, #030305 65%);
+  box-shadow: 0 0 0 1px #030305, inset 0 0 7px #000;
+}
+.watch-status { margin: 0 1px 12px; font-size: 9px; }
+.watch-now { margin-bottom: 8px; }
+.watch-title { font-size: 20px; line-height: 1.08; letter-spacing: -.035em; font-weight: 600; }
+.watch-author { margin-block: 5px 10px; font-size: 7px; }
+.watch-progress { height: 2px; background: #33313b; }
+.watch-times { margin-top: 5px; }
+.watch-controls { margin-top: 8px; }
+.watch-play { width: 36px; height: 36px; background: #beb0f9; }
+.skip-transport { display: grid; place-items: center; width: 30px; height: 30px; }
+.skip-transport svg { display: block; width: 29px; height: 29px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.skip-transport small { top: 11px; left: 0; width: 30px; text-align: center; font: 600 8px/1 -apple-system, BlinkMacSystemFont, sans-serif; }
+
+/* Satin sport band. Tapered ends, rounded edges, inset sizing holes,
+   and attachment shadows give the straps thickness and curvature. */
+.watch-strap {
+  left: 34px;
+  width: 124px;
+  height: 153px;
+  border: 1px solid #92869f;
+  background: linear-gradient(90deg, #3e354c 0%, #857591 4%, #70627e 9%, #7f708e 24%, #887998 47%, #7b6b89 71%, #675973 93%, #a18db0 98%, #54445f);
+  box-shadow: inset 2px 0 3px #e4d0f026, inset -3px 0 4px #23132f66, 4px 5px 7px #0004;
+}
+.strap-top {
+  bottom: calc(100% - 31px);
+  border-radius: 52% 48% 16px 16px / 28% 26% 12px 12px;
+  transform: perspective(340px) rotateX(32deg) rotateZ(-2deg);
+  transform-origin: center bottom;
+  background: linear-gradient(180deg, #b7a7c3 0%, #8c7b9b 6%, #776582 19%, #65546f 63%, #302837 90%, #211e28), linear-gradient(90deg, #413347, #9784a5 35%, #604d6c);
+}
+.strap-top::before {
+  content: "";
+  position: absolute;
+  inset: 7px 7px 15px;
+  border-radius: inherit;
+  border-top: 2px solid #d3bfd733;
+  border-inline: 1px solid #dfc8ef17;
+  box-shadow: inset 0 6px 10px #ffffff08, inset 0 -25px 25px #100c1a99;
+}
+.strap-top::after {
+  content: "";
+  position: absolute;
+  inset: auto -3px 11px;
+  height: 17px;
+  border-radius: 5px;
+  background: linear-gradient(#776982, #3a3045 35%, #1f1a28 70%, #9686a3);
+  box-shadow: 0 2px 3px #0006;
+}
+.strap-bottom {
+  top: calc(100% - 26px);
+  height: 147px;
+  border-radius: 12px 12px 53% 47% / 12px 12px 26% 28%;
+  transform: perspective(400px) rotateX(-24deg) rotateZ(1deg);
+  transform-origin: center top;
+}
+.strap-bottom::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(#100b1acc, #21162955 18%, transparent 42%, #ffffff09 76%, #17102155);
+  box-shadow: inset 0 -2px 2px #cbb7dd44;
+}
+.strap-bottom::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 15px;
+  left: calc(50% - 4px);
+  top: 47px;
+  border-radius: 6px;
+  background: #32293e;
+  border: 1px solid #5f516e;
+  box-shadow: inset 0 2px 3px #0b0814bb, 0 1px 0 #bfacc466, 0 26px 0 -1px #32293e, 0 27px 0 0 #ba9ec144, 0 52px 0 -1px #32293e, 0 53px 0 0 #ba9ec144;
+}
+.watch-crown {
+  right: -13px;
+  top: 54px;
+  width: 17px;
+  height: 34px;
+  border: 1px solid #a9a3b0;
+  border-radius: 6px 8px 8px 6px;
+  background: linear-gradient(90deg, #23212b, #bbb4c4 25%, #67616f 55%, #c0b8c9 80%, #3e374a);
+  box-shadow: inset 0 2px 1px #e5ddec, inset 0 -2px 2px #16121f, 2px 3px 3px #0008;
+}
+.watch-crown::after { content: ""; position: absolute; inset: 2px 1px; border-radius: inherit; background: repeating-linear-gradient(0deg, transparent 0 2px, #07051099 2px 3px, #efe8ff66 3px 3.5px); }
+.watch-side-button { right: -7px; top: 112px; width: 9px; height: 44px; border-radius: 6px; background: linear-gradient(90deg, #302c36, #9d94a6 50%, #46404e); border: 1px solid #89818e; box-shadow: 1px 1px 2px #0009; }
+.watch-side-button::after { content: ""; position: absolute; top: -17px; left: 1px; width: 3px; height: 4px; border-radius: 50%; background: #08060d; box-shadow: 0 1px 0 #a69daf66; }
