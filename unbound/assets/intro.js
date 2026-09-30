@@ -29,48 +29,80 @@
   const setState = next => { state = next; overlay.dataset.state = next; };
   setState(state);
   const viewport = window.visualViewport;
-  let height, logoSize;
-  function sizeVideo() {
-    height = viewport ? viewport.height : innerHeight;
-    logoSize = Math.min(240, Math.max(140, innerWidth * .22));
-    overlay.style.top = `${viewport ? viewport.offsetTop : 0}px`;
-    overlay.style.height = `${height}px`;
-    video.style.height = `${height}px`;
-    if (video.videoHeight) video.style.width = `${height * video.videoWidth / video.videoHeight}px`;
-  }
-  sizeVideo();
-  let y = -height / 2 - logoSize, velocity = 0, elapsed = 0, transformTime = 0;
+  const coarsePointer = matchMedia('(any-pointer: coarse)');
+  let height, logoSize, aspectRatio = 16 / 9;
+  let targetHeight, targetAngle, framing = null;
+  let renderedHeight = 0, renderedAngle = 0;
+  let y = 0, velocity = 0, elapsed = 0, transformTime = 0;
   let compression = 0, compressionVelocity = 0;
   let frame = 0, lastTime = null, accumulator = 0;
   let loadingTimer, safetyTimer, videoFrame;
   let transformStart = null;
   let resumePlayback = false;
   const transformDuration = .55;
+  const rotationDuration = .35;
   const dissolveDuration = .18;
   const smooth = t => t * t * (3 - 2 * t);
   // Measured inner-symbol widths: 846/1024 in the icon, 398/540 in the video.
   // Both symbols are centered; exclude the icon's circular backing.
-  const matchedScale = () => (846 / 1024) * logoSize / ((398 / 540) * height);
+  const matchedHeight = () => (846 / 1024) * logoSize / (398 / 540);
+  function reframe(duration, turnDuration, oldHeight = height) {
+    framing = {
+      fromHeight: renderedHeight, toHeight: targetHeight,
+      fromAngle: renderedAngle, toAngle: targetAngle,
+      y: y / oldHeight, velocity: velocity / oldHeight,
+      time: 0, duration, turnDuration,
+    };
+  }
+  function sizeVideo() {
+    const oldHeight = height;
+    const width = viewport ? viewport.width : innerWidth;
+    height = viewport ? viewport.height : innerHeight;
+    logoSize = Math.min(240, Math.max(140, innerWidth * .22));
+    if (video.videoHeight) aspectRatio = video.videoWidth / video.videoHeight;
+    const rotated = coarsePointer.matches && width <= 900 && height > width;
+    const nextAngle = rotated ? -90 : 0;
+    const nextHeight = rotated ? height / aspectRatio : height;
+    const changed = targetAngle !== nextAngle || targetHeight !== nextHeight;
+    targetAngle = nextAngle;
+    targetHeight = nextHeight;
+    overlay.style.top = `${viewport ? viewport.offsetTop : 0}px`;
+    overlay.style.height = `${height}px`;
+    if (changed && transformStart && state !== 'completion') {
+      // Retarget from the displayed pose, even if an earlier turn is unfinished.
+      reframe(rotationDuration, rotationDuration, oldHeight);
+    }
+  }
+  sizeVideo();
+  y = -height / 2 - logoSize;
   function beginTransformation() {
     if (state !== 'transformation' || transformStart) return;
-    transformStart = { y: y / height, velocity: velocity / height, compression };
+    transformStart = { compression };
+    reframe(transformDuration, rotationDuration);
     clearTimeout(loadingTimer);
     overlay.classList.add('has-video-frame');
   }
   function renderArtwork() {
     let expansion = 1, xScale = 1 + compression / 2, yScale = 1 - compression;
-    let videoScale = matchedScale();
+    renderedHeight = matchedHeight();
+    renderedAngle = 0;
     if (transformStart) {
       const t = transformTime + 1e-9 >= transformDuration ? 1 : transformTime / transformDuration;
       const ease = smooth(t);
-      // Hermite interpolation retains the fall/hover velocity at the handoff.
-      y = height * ((2 * t ** 3 - 3 * t ** 2 + 1) * transformStart.y
-        + (t ** 3 - 2 * t ** 2 + t) * transformDuration * transformStart.velocity);
+      const progress = Math.min(1, (framing.time + 1e-9) / framing.duration);
+      const turn = Math.min(1, (framing.time + 1e-9) / framing.turnDuration);
+      const sizeEase = smooth(progress);
+      renderedHeight = framing.fromHeight + (framing.toHeight - framing.fromHeight) * sizeEase;
+      renderedAngle = framing.fromAngle + (framing.toAngle - framing.fromAngle) * smooth(turn);
+      // Hermite interpolation preserves motion at entry and during orientation changes.
+      y = height * ((2 * progress ** 3 - 3 * progress ** 2 + 1) * framing.y
+        + (progress ** 3 - 2 * progress ** 2 + progress) * framing.duration * framing.velocity);
+      velocity = height * ((6 * progress ** 2 - 6 * progress) * framing.y / framing.duration
+        + (3 * progress ** 2 - 4 * progress + 1) * framing.velocity);
       const squash = transformStart.compression * (1 - ease);
       xScale = 1 + squash / 2;
       yScale = 1 - squash;
-      videoScale += (1 - videoScale) * ease;
-      expansion = videoScale / matchedScale();
+      expansion = renderedHeight / matchedHeight();
       const dissolve = Math.min(1, transformTime / dissolveDuration);
       logo.style.opacity = String(1 - dissolve);
       video.style.opacity = String(dissolve);
@@ -82,12 +114,15 @@
         enter.hidden = true;
       }
     }
-    logo.style.transform = `translate(-50%, -50%) translateY(${y}px) scale(${expansion * xScale}, ${expansion * yScale})`;
-    video.style.transform = `translate(-50%, -50%) translateY(${y}px) scale(${videoScale * xScale}, ${videoScale * yScale})`;
+    logo.style.transform = `translate(-50%, -50%) translateY(${y}px) rotate(${renderedAngle}deg) scale(${expansion * xScale}, ${expansion * yScale})`;
+    video.style.height = `${renderedHeight}px`;
+    video.style.width = `${renderedHeight * aspectRatio}px`;
+    video.style.transform = `translate(-50%, -50%) translateY(${y}px) rotate(${renderedAngle}deg) scale(${xScale}, ${yScale})`;
   }
   const step = 1 / 120;
   function integrate(dt) {
     elapsed += dt;
+    if (framing) framing.time += dt;
     if (state === 'entrance' || (state === 'transformation' && !transformStart)) {
       const hoverTime = Math.max(0, elapsed - 1.2);
       const blend = Math.min(1, hoverTime / 1.5);
@@ -181,6 +216,7 @@
     viewport?.removeEventListener('resize', sizeVideo);
     viewport?.removeEventListener('scroll', sizeVideo);
     motion.removeEventListener('change', finish);
+    coarsePointer.removeEventListener('change', sizeVideo);
     const target = previousFocus !== document.body && previousFocus?.isConnected ? previousFocus : document.querySelector('.brand');
     target?.focus({ preventScroll: true });
     setTimeout(() => { video.pause(); overlay.remove(); }, 650);
@@ -206,6 +242,7 @@
   motion.addEventListener('change', finish);
   video.addEventListener('loadedmetadata', sizeVideo);
   window.addEventListener('resize', sizeVideo);
+  coarsePointer.addEventListener('change', sizeVideo);
   viewport?.addEventListener('resize', sizeVideo);
   viewport?.addEventListener('scroll', sizeVideo);
   video.addEventListener('ended', () => finish());

@@ -87,12 +87,16 @@ test('five-second prompt excludes hidden time; handoff waits for a frame and sha
     const alignment = {
       centerX: Math.abs((logoBox.x + logoBox.width / 2) - (videoBox.x + videoBox.width / 2)),
       centerY: Math.abs((logoBox.y + logoBox.height / 2) - (videoBox.y + videoBox.height / 2)),
-      width: Math.abs(logoBox.width * 846 / 1024 - videoBox.height * 398 / 540),
+      width: Math.abs(logo.offsetWidth * Math.hypot(new DOMMatrix(getComputedStyle(logo).transform).a, new DOMMatrix(getComputedStyle(logo).transform).b) * 846 / 1024 - parseFloat(video.style.height) * 398 / 540),
     };
     advance(12);
     const dissolved = logo.hidden;
     advance(44);
-    const end = { state: overlay.dataset.state, opacity: video.style.opacity, transform: video.style.transform };
+    const rotated = matchMedia('(any-pointer: coarse)').matches && visualViewport.width <= 900 && visualViewport.height > visualViewport.width;
+    const finalWidth = parseFloat(video.style.width);
+    const expectedWidth = rotated ? visualViewport.height : visualViewport.height * video.videoWidth / video.videoHeight;
+    const angle = Math.atan2(new DOMMatrix(getComputedStyle(video).transform).b, new DOMMatrix(getComputedStyle(video).transform).a) * 180 / Math.PI;
+    const end = { rotated, finalWidth, expectedWidth, angle, state: overlay.dataset.state, opacity: video.style.opacity, transform: video.style.transform };
     return { beforeFive, afterHidden, atFive, beforePress, afterPress, waiting, alignment, dissolved, end };
   });
   expect(result.beforeFive).toBe(false);
@@ -106,5 +110,7 @@ test('five-second prompt excludes hidden time; handoff waits for a frame and sha
   expect(result.dissolved).toBe(true);
   expect(result.end.state).toBe('video');
   expect(result.end.opacity).toBe('1');
+  expect(result.end.angle).toBeCloseTo(result.end.rotated ? -90 : 0);
+  expect(result.end.finalWidth).toBeCloseTo(result.end.expectedWidth, 1);
   expect(result.end.transform).toContain('scale(1, 1)');
 });
