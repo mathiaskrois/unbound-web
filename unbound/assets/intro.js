@@ -14,6 +14,24 @@
   video.src = new URL('intro.mp4', document.currentScript.src).href;
   document.body.append(overlay);
   document.documentElement.classList.add('intro-playing');
+  // Use the visible screen, including changes to mobile browser toolbars.
+  // Width comes only from the source ratio, never from the device width.
+  const viewport = window.visualViewport;
+  function sizeVideo() {
+    const height = viewport ? viewport.height : window.innerHeight;
+    overlay.style.top = `${viewport ? viewport.offsetTop : 0}px`;
+    overlay.style.height = `${height}px`;
+    overlay.style.bottom = 'auto';
+    video.style.height = `${height}px`;
+    if (video.videoHeight) {
+      video.style.width = `${height * video.videoWidth / video.videoHeight}px`;
+    }
+  }
+  sizeVideo();
+  video.addEventListener('loadedmetadata', sizeVideo);
+  window.addEventListener('resize', sizeVideo);
+  viewport?.addEventListener('resize', sizeVideo);
+  viewport?.addEventListener('scroll', sizeVideo);
   let finished = false;
   let loadingTimer;
   let safetyTimer;
@@ -23,6 +41,10 @@
     clearTimeout(loadingTimer);
     clearTimeout(safetyTimer);
     video.pause();
+    video.removeEventListener('loadedmetadata', sizeVideo);
+    window.removeEventListener('resize', sizeVideo);
+    viewport?.removeEventListener('resize', sizeVideo);
+    viewport?.removeEventListener('scroll', sizeVideo);
     overlay.classList.add('is-finished');
     document.documentElement.classList.remove('intro-playing');
     document.removeEventListener('keydown', onKey);
