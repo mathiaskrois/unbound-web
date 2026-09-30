@@ -51,6 +51,17 @@ test('renders branded assets, working navigation, and all public routes', async 
   expect(errors).toEqual([]);
 });
 
+test('shows the complete support portrait on mobile', async ({ page }) => {
+  await page.goto('/unbound/support/');
+  const portrait = page.locator('.owner-card img');
+  await expect(portrait).toBeVisible();
+  await expect(portrait).toHaveJSProperty('naturalWidth', 719);
+  await expect(portrait).toHaveJSProperty('naturalHeight', 900);
+  await expect(portrait).toHaveCSS('object-fit', 'contain');
+  const box = await portrait.boundingBox();
+  expect(box.height / box.width).toBeCloseTo(900 / 719, 2);
+});
+
 test('devices respond to scroll, pause, resume, and stop updating when idle', async ({ page }) => {
   await page.goto('/unbound/');
   const mobile = await page.evaluate(() => innerWidth <= 900);

@@ -75,5 +75,5 @@ h1 { max-width: 800px; margin-bottom: 22px; font-size: clamp(3rem, 8vw, 6.4rem);
   .feature-grid { grid-template-columns: 1fr; padding-bottom: 58px; }
   .card { min-height: 0; }
   .owner-card { grid-template-columns: 1fr; }
-  .owner-card img { width: 100%; height: min(55vw, 300px); object-position: center 28%; }
+  .owner-card img { width: 100%; height: auto; object-fit: contain; }
 }
