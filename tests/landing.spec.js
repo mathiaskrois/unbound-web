@@ -137,9 +137,12 @@ test('content remains available without JavaScript', async ({ browser }) => {
   await context.close();
 });
 
-test('device choreography is identical at 30 and 120 fps', async ({ page }) => {
+test('device choreography is identical at 30 and 120 fps', async ({ context }) => {
+  // Each rate gets a fresh tab, so no scroll position or entrance state carries over between runs.
   async function sample(fps) {
+    const page = await context.newPage();
     await page.addInitScript(() => {
+      sessionStorage.setItem('unbound-intro-seen', '1');
       let callbacks = new Map(), next = 0;
       window.requestAnimationFrame = callback => { callbacks.set(++next, callback); return next; };
       window.cancelAnimationFrame = id => callbacks.delete(id);
@@ -151,7 +154,7 @@ test('device choreography is identical at 30 and 120 fps', async ({ page }) => {
     });
     await page.goto('/unbound/', { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
-    return page.evaluate(fps => {
+    const values = await page.evaluate(fps => {
       const phone = document.querySelector('.phone');
       const watch = document.querySelector('.watch');
       // Both runs measure the settled layout before scrolling.
@@ -165,6 +168,8 @@ test('device choreography is identical at 30 and 120 fps', async ({ page }) => {
       }
       return values;
     }, fps);
+    await page.close();
+    return values;
   }
   const numbers = value => value.match(/-?[\d.]+/g).map(Number);
   const low = await sample(30);
