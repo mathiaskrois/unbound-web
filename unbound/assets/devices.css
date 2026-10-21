@@ -1,34 +1,52 @@
 /* Shared product hardware. Real library capture; illustrated Watch player.
-   Materials are static layers; landing.js animates only the device transforms. */
-.device-scene { grid-template-rows: minmax(0, 1fr); }
-.scene-atmosphere .orbit { display: none; }
+   The single source for device geometry and materials on every page.
+   motion.js drives the device poses through custom properties only. */
+
+/* The 540×680 stage scales to fit its scene. --device-fill is the share of the scene
+   height the stage may use; the stage may overhang the scene width slightly, because the
+   devices do not fill the stage edge to edge. */
+.device-scene { container-type: size; grid-template-rows: minmax(0, 1fr); --device-fill: .8; --device-max: 1.05; }
+.device-canvas {
+  position: relative;
+  flex: none;
+  width: 540px;
+  height: 680px;
+  perspective: 1300px;
+  transform: scale(var(--device-scale, .9));
+}
+@supports (width: calc(tan(atan2(1px, 1px)) * 1px)) {
+  .device-canvas {
+    --device-scale: min(var(--device-max), tan(atan2(calc(100cqh * var(--device-fill)), 680px)), tan(atan2(calc(100cqw * 1.14), 540px)));
+  }
+}
+.device { position: absolute; transform-style: preserve-3d; }
 
 /* A thin machined enclosure, a dark gasket, and uninterrupted edge-to-edge glass. */
-.phone { height: 577px; }
+.phone { width: 274px; height: 577px; left: 66px; top: 32px; transform: translate3d(0, 0, 0) rotateX(7deg) rotateY(-14deg) rotateZ(-8deg); }
 .phone::before {
   content: "";
   position: absolute;
-  inset: 1px -7px -2px 5px;
+  inset: 1px -1px -2px -1px;
   border-radius: 45px;
+  transform: translateX(var(--edge, 6px));
   background: linear-gradient(90deg, #121319 88%, #7a7981 94%, #292a31 98%, #b6b4bc);
   box-shadow: 14px 18px 24px #0005, 35px 48px 60px #0006;
 }
 .phone-rim {
   position: relative;
+  height: 100%;
   padding: 5px;
   border: 1px solid #a4a2ac;
   border-radius: 44px;
   background: linear-gradient(125deg, #e5e4e9 0%, #929099 5%, #36363e 19%, #15161d 43%, #66646d 79%, #c0bdc6 94%, #40404a);
   box-shadow: inset 0 0 0 1px #d5d3df66, inset -2px -1px 2px #000a, 1px 0 0 #f2eaff55;
 }
-.phone-screen { position: relative; border: 2px solid #05060a; border-radius: 38px; }
-.phone-screen img { object-fit: cover; }
+.phone-screen { position: relative; height: 100%; overflow: hidden; border: 2px solid #05060a; border-radius: 38px; background: #0b0e17; }
+.phone-screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
 /* Update the branding in the historical Library capture without repainting
    or replacing its actual library content. All branding uses the shared asset. */
 .phone-brand { position: absolute; left: 3.8%; top: 7.05%; width: 33.8%; height: 5.2%; display: flex; align-items: center; gap: 3px; padding: 2px 4px; border: 1px solid #383b53; border-radius: 30px; background: #1b1e2c; color: #f2f3ff; font: 700 12px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: -.5px; }
 .phone-screen .phone-brand img { width: 24%; height: auto; aspect-ratio: 1; object-fit: contain; flex-shrink: 0; }
-.watch-brand { display: inline-flex; align-items: center; gap: 3px; }
-.watch-brand img { display: block; width: 12px; height: 12px; object-fit: contain; }
 .phone-screen::after {
   content: "";
   position: absolute;
@@ -38,7 +56,7 @@
   background: linear-gradient(112deg, #e9edff0d, transparent 24%, transparent 76%, #d8dcff04);
   box-shadow: inset 1px 1px 2px #ffffff26, inset -1px 0 2px #d0d2ee14;
 }
-.phone-button { left: -3px; width: 3px; background: linear-gradient(90deg, #28292f, #bab7bf 50%, #45434e); border-top: 1px solid #d4d1d8; box-shadow: -1px 1px 2px #0009; }
+.phone-button { position: absolute; left: -3px; width: 3px; border-radius: 2px 0 0 2px; background: linear-gradient(90deg, #28292f, #bab7bf 50%, #45434e); border-top: 1px solid #d4d1d8; box-shadow: -1px 1px 2px #0009; }
 .phone-button-one { top: 91px; height: 18px; }
 .phone-button-two { top: 131px; height: 37px; }
 .phone-button-three { top: 178px; height: 37px; }
@@ -48,8 +66,12 @@
 
 /* Polished graphite case: the narrow metal lip catches the studio light,
    while the curved cover glass stays almost black around the display. */
-.watch { width: 192px; height: 232px; transform-style: flat; }
+.watch { width: 192px; height: 232px; right: 34px; top: 365px; transform-style: flat; transform: translate3d(0, 0, 70px) rotateX(8deg) rotateY(-17deg) rotateZ(13deg); }
 .watch-case {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   padding: 5px;
   border-radius: 49px;
   border: 1px solid #b9b6c0;
@@ -67,27 +89,39 @@
 }
 .watch-screen {
   position: relative;
+  height: 100%;
+  overflow: hidden;
   padding: 14px 13px 10px;
   border: 4px solid #050507;
   border-radius: 43px;
   background: radial-gradient(ellipse at 30% 0, #15141b 0, #030305 65%);
   box-shadow: 0 0 0 1px #030305, inset 0 0 7px #000;
+  color: #f3f1ff;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.watch-status { margin: 0 1px 12px; font-size: 9px; }
-.watch-now { margin-bottom: 8px; }
+/* Watch screen type is part of the illustration (aria-hidden) and drawn at hardware scale. */
+.watch-status { display: flex; justify-content: space-between; margin: 0 1px 12px; font-size: 9px; font-weight: 600; }
+.watch-status > :first-child { color: var(--violet); }
+.watch-brand { display: inline-flex; align-items: center; gap: 3px; }
+.watch-brand img { display: block; width: 12px; height: 12px; object-fit: contain; }
+.watch-now { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; font-size: 6px; letter-spacing: .1em; color: var(--mint); }
+.watch-now .tiny-wave { height: 10px; transform: scale(.65); transform-origin: left; width: 11px; }
 .watch-title { font-size: 20px; line-height: 1.08; letter-spacing: -.035em; font-weight: 600; }
-.watch-author { margin-block: 5px 10px; font-size: 7px; }
-.watch-progress { height: 2px; background: #33313b; }
-.watch-times { margin-top: 5px; }
-.watch-controls { margin-top: 8px; }
-.watch-play { width: 36px; height: 36px; background: #beb0f9; }
-.skip-transport { display: grid; place-items: center; width: 30px; height: 30px; }
+.watch-author { margin: 5px 0 10px; font-size: 7px; color: #b6b0c6; }
+.watch-progress { height: 2px; border-radius: 4px; background: #33313b; }
+.watch-progress > span { display: block; width: 100%; height: 100%; background: var(--mint); border-radius: inherit; transform: scaleX(.58); transform-origin: left; }
+.watch-times { display: flex; justify-content: space-between; margin-top: 5px; font-size: 6px; color: #aaa6b7; }
+.watch-controls { display: flex; align-items: center; justify-content: space-around; margin-top: 8px; }
+.watch-play { display: flex; align-items: center; justify-content: center; gap: 4px; width: 36px; height: 36px; border-radius: 50%; background: #beb0f9; }
+.watch-play i { display: block; width: 3px; height: 12px; background: #141221; border-radius: 1px; }
+.skip-transport { position: relative; display: grid; place-items: center; width: 30px; height: 30px; font-size: 28px; line-height: 1; }
 .skip-transport svg { display: block; width: 29px; height: 29px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.skip-transport small { top: 11px; left: 0; width: 30px; text-align: center; font: 600 8px/1 -apple-system, BlinkMacSystemFont, sans-serif; }
+.skip-transport small { position: absolute; top: 11px; left: 0; width: 30px; text-align: center; font: 600 8px/1 -apple-system, BlinkMacSystemFont, sans-serif; }
 
 /* Satin sport band. Tapered ends, rounded edges, inset sizing holes,
    and attachment shadows give the straps thickness and curvature. */
 .watch-strap {
+  position: absolute;
   left: 34px;
   width: 124px;
   height: 153px;
@@ -148,6 +182,7 @@
   box-shadow: inset 0 2px 3px #0b0814bb, 0 1px 0 #bfacc466, 0 26px 0 -1px #32293e, 0 27px 0 0 #ba9ec144, 0 52px 0 -1px #32293e, 0 53px 0 0 #ba9ec144;
 }
 .watch-crown {
+  position: absolute;
   right: -13px;
   top: 54px;
   width: 17px;
@@ -158,5 +193,33 @@
   box-shadow: inset 0 2px 1px #e5ddec, inset 0 -2px 2px #16121f, 2px 3px 3px #0008;
 }
 .watch-crown::after { content: ""; position: absolute; inset: 2px 1px; border-radius: inherit; background: repeating-linear-gradient(0deg, transparent 0 2px, #07051099 2px 3px, #efe8ff66 3px 3.5px); }
-.watch-side-button { right: -7px; top: 112px; width: 9px; height: 44px; border-radius: 6px; background: linear-gradient(90deg, #302c36, #9d94a6 50%, #46404e); border: 1px solid #89818e; box-shadow: 1px 1px 2px #0009; }
+.watch-side-button { position: absolute; right: -7px; top: 112px; width: 9px; height: 44px; border-radius: 6px; background: linear-gradient(90deg, #302c36, #9d94a6 50%, #46404e); border: 1px solid #89818e; box-shadow: 1px 1px 2px #0009; }
 .watch-side-button::after { content: ""; position: absolute; top: -17px; left: 1px; width: 3px; height: 4px; border-radius: 50%; background: #08060d; box-shadow: 0 1px 0 #a69daf66; }
+
+/* Reflections on the glass. landing.js slides them as the devices turn. */
+.device-glare { position: absolute; inset: -35%; z-index: 2; pointer-events: none; border-radius: 50%; background: radial-gradient(circle at 34% 30%, #ffffff17, #ffffff06 22%, transparent 42%); }
+.watch-screen .device-glare { inset: -45%; background: radial-gradient(circle at 32% 28%, #ffffff14, #ffffff05 20%, transparent 40%); }
+
+/* A file on its way from the iPhone library to the watch, positioned by landing.js. */
+.transfer-chip { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; padding: 7px 11px 7px 9px; border: 1px solid #a6edd655; border-radius: 20px; background: #161927f2; color: var(--mint); font: 700 11px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; letter-spacing: .08em; box-shadow: 0 10px 26px #0009, 0 0 22px #a6edd626; opacity: 0; pointer-events: none; }
+.transfer-chip i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+
+/* Ambient motion. Only after landing.js has set up the pause control (.motion-ready). */
+.motion-ready .device { will-change: transform; }
+.motion-ready .phone { animation: device-float 6.5s ease-in-out infinite; }
+.motion-ready .watch { animation: device-float 7.4s ease-in-out -2.6s infinite; --float: -6px; }
+.motion-ready .tiny-wave i { animation: device-wave 1.15s ease-in-out infinite; }
+.motion-ready .tiny-wave i:nth-child(2) { animation-delay: -.3s; }
+.motion-ready .tiny-wave i:nth-child(3) { animation-delay: -.65s; }
+.motion-ready .tiny-wave i:nth-child(4) { animation-delay: -.15s; }
+.motion-ready .tiny-wave i:nth-child(5) { animation-delay: -.85s; }
+/* 12:48 of 22:04 played: the bar fills over the remaining 556 seconds, in step with the clock. */
+.motion-ready .watch-progress > span { animation: device-progress 556s linear forwards; }
+.device-scene.is-offscreen *, .motion-paused .device, .motion-paused .device *, .motion-paused .tiny-wave i { animation-play-state: paused !important; }
+@keyframes device-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 var(--float, -5px); } }
+@keyframes device-wave { 0%, 100% { transform: scaleY(.45); } 50% { transform: scaleY(1); } }
+@keyframes device-progress { to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .motion-ready .device, .motion-ready .tiny-wave i, .motion-ready .watch-progress > span { animation: none; }
+  .transfer-chip { display: none; }
+}

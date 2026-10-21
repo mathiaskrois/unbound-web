@@ -29,7 +29,7 @@
   const enter = overlay.querySelector('.intro-enter');
   const sound = overlay.querySelector('.intro-sound');
   const skip = overlay.querySelector('.intro-skip');
-  logo.src = new URL('watch-icon.png?v=spring-1', base).href;
+  logo.src = new URL('watch-icon.webp?v=webp-1', base).href;
   video.src = new URL('intro.mp4?v=transform-1', base).href;
   document.body.append(overlay);
   document.documentElement.classList.add('intro-playing');
@@ -148,7 +148,7 @@
       const target = Math.sin(hoverTime * Math.PI * 2 / 4.8) * 8 * blend * blend * (3 - 2 * blend);
       velocity += (64 * (target - y) - 12 * velocity) * dt;
       y += velocity * dt;
-      if (state === 'entrance' && elapsed + 1e-9 >= 5) overlay.classList.add('is-ready');
+      if (state === 'entrance' && elapsed + 1e-9 >= 1.5) overlay.classList.add('is-ready');
       const compressionTarget = elapsed < 1.2 ? Math.min(.06, Math.max(0, y) / logoSize * .6) : 0;
       compressionVelocity += (180 * (compressionTarget - compression) - 24 * compressionVelocity) * dt;
       compression = Math.max(0, Math.min(.06, compression + compressionVelocity * dt));

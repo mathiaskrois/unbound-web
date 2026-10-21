@@ -7,20 +7,31 @@
   <meta name="description" content="Your own MP3 files, on Apple Watch. See how Unbound takes your audiobooks and long-form audio from iPhone to offline listening on your wrist.">
   <title>The Unbound experience — Your files, on your Watch</title>
   <link rel="canonical" href="https://krois.dk/unbound/experience/">
-  <link rel="icon" href="../assets/favicon.ico?v=glass-2" sizes="16x16 32x32 48x48">
-  <link rel="icon" type="image/png" href="../assets/favicon-32.png?v=glass-2" sizes="32x32">
-  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png?v=glass-2" sizes="180x180">
-  <link rel="stylesheet" href="../assets/site.css?v=glass-2">
-  <link rel="stylesheet" href="../assets/landing.css?v=glass-2">
-  <link rel="stylesheet" href="../assets/devices.css?v=glass-2">
+  <meta property="og:title" content="The Unbound experience — Your files, on your Watch">
+  <meta property="og:description" content="Your own MP3 files, on Apple Watch. From your iPhone library to offline listening on your wrist.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://krois.dk/unbound/experience/">
+  <meta property="og:image" content="https://krois.dk/unbound/assets/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Unbound on iPhone and Apple Watch: Your audio. On your Watch.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../assets/favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/png" href="../assets/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png" sizes="180x180">
+  <link rel="stylesheet" href="../assets/tokens.css">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/landing.css">
+  <link rel="stylesheet" href="../assets/devices.css">
   <link rel="stylesheet" href="../assets/experience.css">
+  <script src="../assets/motion.js" defer></script>
   <script src="../assets/landing.js" defer></script>
   <script src="../assets/experience.js" defer></script>
 </head>
 <body class="landing experience-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header"><div class="shell landing-nav">
-    <a class="brand" href="../" aria-label="Unbound home"><img src="../assets/app-icon.webp?v=glass-2" width="32" height="32" alt="">unbound</a>
+    <a class="brand" href="../" aria-label="Unbound home"><img src="../assets/app-icon.webp" width="32" height="32" alt="">unbound</a>
     <nav aria-label="Primary navigation"><a href="./" aria-current="page">The experience</a><a class="nav-support" href="../support/">Support</a><a class="nav-cta" href="../#availability">Coming soon <span aria-hidden="true">↗</span></a></nav>
   </div></header>
   <main id="main">
@@ -33,24 +44,9 @@
         <p class="platform-note">Import on iPhone. Transfer to Watch. Listen offline.</p>
       </div>
       <figure class="device-scene" aria-label="Unbound’s Library screen on iPhone alongside an illustrated Mini Player on Apple Watch">
-        <div class="scene-atmosphere" aria-hidden="true"><div class="scene-glow"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div></div>
-        <div class="device-canvas">
-          <div class="phone device" aria-hidden="true">
-            <div class="phone-button phone-button-one"></div><div class="phone-button phone-button-two"></div><div class="phone-button phone-button-three"></div>
-            <div class="phone-rim"><div class="phone-screen"><img src="../assets/library-dark.webp" width="660" height="1435" alt="" fetchpriority="high" decoding="async"><span class="phone-brand"><img src="../assets/app-icon.webp?v=glass-2" width="24" height="24" alt="">unbound</span></div></div>
-          </div>
-          <div class="watch device" aria-hidden="true">
-            <div class="watch-strap strap-top"></div><div class="watch-strap strap-bottom"></div><div class="watch-crown"></div><div class="watch-side-button"></div>
-            <div class="watch-case"><div class="watch-screen">
-              <div class="watch-status"><span class="watch-brand"><img src="../assets/app-icon.webp?v=glass-2" width="12" height="12" alt="">unbound</span><span>9:41</span></div>
-              <div class="watch-now"><span class="tiny-wave"><i></i><i></i><i></i><i></i><i></i></span> MINI PLAYER</div>
-              <div class="watch-title">The Secret<br>Garden</div><div class="watch-author">Frances Hodgson Burnett</div>
-              <div class="watch-progress"><span></span></div><div class="watch-times"><span>12:48</span><span>22:04</span></div>
-              <div class="watch-controls"><span class="skip-transport"><svg viewBox="0 0 30 30"><path d="M8 7a10 10 0 1 1-3 7M8 3v5H3"/></svg><small>15</small></span><span class="watch-play"><i></i><i></i></span><span class="skip-transport"><svg viewBox="0 0 30 30"><path d="M22 7a10 10 0 1 0 3 7M22 3v5h5"/></svg><small>30</small></span></div>
-            </div></div>
-          </div>
-        </div>
-        <figcaption class="scene-caption"><span class="caption-line"></span> A whole library. A little freedom.</figcaption>
+        <div class="scene-atmosphere" aria-hidden="true"><div class="scene-glow"></div></div>
+        <!-- include:device-canvas -->
+        <figcaption class="scene-caption"><span class="caption-line"></span> A whole library. A little freedom.<small>iPhone app preview · Watch player illustration</small></figcaption>
         <button class="motion-toggle" type="button" aria-pressed="false" hidden><span aria-hidden="true">Ⅱ</span> <span class="motion-label">Pause motion</span></button>
       </figure>
       <div class="chapter" data-chapter="1">
@@ -105,6 +101,6 @@
       <a class="primary-link" href="../#availability">Coming soon to the App Store <span aria-hidden="true">↗</span></a>
     </div></section>
   </main>
-  <footer class="footer"><div class="shell footer-inner"><div><a class="brand footer-brand" href="../"><img src="../assets/app-icon.webp?v=glass-2" width="32" height="32" alt="">unbound</a><p>© 2026 Krøis Creative · CVR 46408713</p></div><nav aria-label="Legal navigation"><a href="../privacy/">Privacy</a><a href="../terms/">Terms</a><a href="../support/">Support</a></nav></div></footer>
+  <footer class="footer"><div class="shell footer-inner"><div><a class="brand footer-brand" href="../"><img src="../assets/app-icon.webp" width="32" height="32" alt="">unbound</a><p>© 2026 Krøis Creative · CVR 46408713</p></div><nav aria-label="Legal navigation"><a href="../privacy/">Privacy</a><a href="../terms/">Terms</a><a href="../support/">Support</a></nav></div></footer>
 </body>
 </html>
