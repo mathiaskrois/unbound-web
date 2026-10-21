@@ -15,16 +15,19 @@
 .preview-eyebrow { font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; color: #b9b1cd; }
 .file-visual { width: 170px; height: 160px; margin: 25px auto 15px; position: relative; display: grid; place-items: center; }
 .file-orbit { position: absolute; inset: 0; border: 1px solid #7e739c55; border-radius: 50%; transform: rotate(-25deg) scaleX(1.25); }
-.file-glyph { position: relative; display: grid; place-items: center; width: 76px; height: 98px; border: 1px solid #b6a4e6; border-radius: 10px 24px 10px 10px; background: #49405f; color: #e8dfff; font-weight: 650; letter-spacing: .1em; font-size: 15px; transform: rotate(-9deg); transition: transform .5s, background .5s; }
-.file-check { position: absolute; right: 31px; bottom: 22px; width: 27px; height: 27px; background: #a6edd6; color: #172c29; border-radius: 50%; opacity: 0; transform: scale(.7); transition: opacity .35s, transform .35s; }
+.file-glyph { position: relative; display: grid; place-items: center; width: 76px; height: 98px; border: 1px solid #b6a4e6; border-radius: 10px 24px 10px 10px; background: #49405f; color: #e8dfff; font-weight: 650; letter-spacing: .1em; font-size: 15px; transform: rotate(-9deg); transition: transform var(--dur-reveal) var(--ease-spring), background var(--dur-base) var(--ease-out); }
+.file-check { position: absolute; right: 31px; bottom: 22px; width: 27px; height: 27px; background: #a6edd6; color: #172c29; border-radius: 50%; opacity: 0; transform: scale(.4); transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-spring); }
 [data-state="transfer"] .file-glyph { transform: translateX(14px) rotate(8deg); background: #665484; }
 [data-state="listen"] .file-glyph { transform: rotate(0); background: #314b49; }
-[data-state="listen"] .file-check { opacity: 1; transform: scale(1); }
+[data-state="listen"] .file-check { opacity: 1; transform: scale(1); transition-delay: .25s; }
+.journey-step { transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+.experience-page .scene-caption { flex-wrap: wrap; row-gap: 7px; }
+.experience-page .scene-caption small { flex-basis: 100%; padding-left: 36px; font-size: var(--text-label); color: #9d98ac; letter-spacing: .015em; }
 .journey-preview h3 { font-size: 24px; font-weight: 550; letter-spacing: -.035em; margin-bottom: 5px; }
 .sample-author { font-size: 12px; color: #b8b3c8; }
 .journey-route { display: flex; gap: 15px; align-items: center; justify-content: center; padding: 24px 0; font-size: 11px; color: #c5bfd5; }
 .route-line { height: 2px; width: 70px; background: #474458; position: relative; }
-.route-line::after { content: ""; display: block; width: 100%; height: 100%; background: #a6edd6; transform: scaleX(0); transform-origin: left; transition: transform .6s ease; }
+.route-line::after { content: ""; display: block; width: 100%; height: 100%; background: #a6edd6; transform: scaleX(0); transform-origin: left; transition: transform var(--dur-reveal) var(--ease-out); }
 [data-state="transfer"] .route-line::after { transform: scaleX(.55); }
 [data-state="listen"] .route-line::after { transform: scaleX(1); }
 [data-state="listen"] .route-watch { color: #a6edd6; }

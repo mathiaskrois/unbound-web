@@ -89,8 +89,9 @@
 .landing .footer p { font-size: var(--text-small); margin: 8px 0 0; }
 .footer-note { font-size: var(--text-small); }
 .landing .footer nav { gap: 25px; font-size: 11px; }
-.reveal-ready [data-reveal] { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.3,1); }
-.reveal-ready [data-reveal]:not(.is-visible) { opacity: 0; transform: translateY(22px); }
+/* Content rises into place as it enters the viewport; siblings follow one another (--i set by landing.js). */
+.reveal-ready [data-reveal] { transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger)); }
+.reveal-ready [data-reveal]:not(.is-visible) { opacity: 0; transform: translateY(24px); }
 @media (max-width: 1100px) { .landing .shell { width: calc(100% - 64px); } .scene-caption { left: 5%; font-size: var(--text-label); } .motion-toggle { bottom: 62px; } .essential-card { padding-inline: 18px; } }
 @media (max-width: 900px) {
   .landing .shell { width: calc(100% - 40px); }
@@ -138,3 +139,27 @@
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal-ready [data-reveal], .primary-link { transition: none; } .reveal-ready [data-reveal]:not(.is-visible) { opacity: 1; transform: none; } }
 .motion-paused { scroll-behavior: auto; }
 .motion-paused [data-reveal] { transition: none; opacity: 1 !important; transform: none !important; }
+
+/* Essentials artwork: a one-time arrangement as each card arrives. Uses individual transform
+   properties, so the resting rotations in the transform declarations stay untouched. */
+.reveal-ready .essential-card .book, .reveal-ready .essential-card .bookmark-mark, .reveal-ready .essential-card .pace-art > *, .reveal-ready .essential-card .privacy-ring { transition: translate .9s var(--ease-spring), scale .7s var(--ease-spring), opacity .5s var(--ease-out); transition-delay: calc(var(--i, 0) * var(--stagger) + var(--d, 0ms) + 120ms); }
+.reveal-ready .essential-card:not(.is-visible) .book { translate: 0 26px; opacity: 0; }
+.reveal-ready .essential-card .book-two { --d: 80ms; }
+.reveal-ready .essential-card .book-three { --d: 160ms; }
+.reveal-ready .essential-card .bookmark-mark { --d: 360ms; }
+.reveal-ready .essential-card:not(.is-visible) .bookmark-mark { scale: 0; }
+.reveal-ready .essential-card:not(.is-visible) .pace-art > * { translate: 18px 0; opacity: 0; }
+.reveal-ready .essential-card .pace-art > :nth-child(2) { --d: 70ms; }
+.reveal-ready .essential-card .pace-art > :nth-child(3) { --d: 140ms; }
+.reveal-ready .essential-card .pace-art > .pace-ticks { --d: 40ms; }
+.reveal-ready .essential-card:not(.is-visible) .privacy-ring { scale: .82; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .reveal-ready .essential-card * { transition: none !important; translate: none !important; scale: none !important; opacity: 1 !important; } }
+.motion-paused .essential-card * { transition: none !important; translate: none !important; scale: none !important; opacity: 1 !important; }
+
+/* Moving between the home and experience pages, the devices glide to their new place. */
+@view-transition { navigation: auto; }
+.landing .brand:not(.footer-brand) { view-transition-name: unbound-brand; }
+.phone { view-transition-name: unbound-phone; }
+.watch { view-transition-name: unbound-watch; }
+::view-transition-group(*) { animation-duration: .55s; animation-timing-function: var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }

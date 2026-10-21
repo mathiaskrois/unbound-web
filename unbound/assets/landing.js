@@ -172,7 +172,13 @@
         revealObserver.unobserve(entry.target);
       }
     }, { threshold: .12 });
-    document.querySelectorAll('[data-reveal]').forEach(element => revealObserver.observe(element));
+    // Chapter text reveals line by line; grouped elements share one stagger sequence.
+    document.querySelectorAll('.chapter:not(.chapter-intro) > *').forEach(element => element.setAttribute('data-reveal', ''));
+    document.querySelectorAll('[data-reveal]').forEach(element => {
+      const group = [...element.parentElement.children].filter(sibling => sibling.hasAttribute('data-reveal'));
+      element.style.setProperty('--i', String(Math.min(group.indexOf(element), 5)));
+      revealObserver.observe(element);
+    });
     root.classList.add('reveal-ready');
   }
   if ('ResizeObserver' in window) new ResizeObserver(measure).observe(story);
