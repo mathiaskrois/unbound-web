@@ -135,3 +135,64 @@ test('content remains available without JavaScript', async ({ browser }) => {
   await expect(page.getByRole('heading', { name: 'Bring your own world.' })).toBeVisible();
   await context.close();
 });
+
+test('device choreography is identical at 30 and 120 fps', async ({ page }) => {
+  async function sample(fps) {
+    await page.addInitScript(() => {
+      let callbacks = new Map(), next = 0;
+      window.requestAnimationFrame = callback => { callbacks.set(++next, callback); return next; };
+      window.cancelAnimationFrame = id => callbacks.delete(id);
+      window.tick = time => {
+        const batch = callbacks;
+        callbacks = new Map();
+        for (const callback of batch.values()) callback(time);
+      };
+    });
+    await page.goto('/unbound/');
+    return page.evaluate(fps => {
+      const phone = document.querySelector('.phone');
+      const watch = document.querySelector('.watch');
+      window.scrollTo({ top: 700, behavior: 'instant' });
+      window.dispatchEvent(new Event('scroll'));
+      const values = [];
+      for (let frame = 1; frame <= fps * 2; frame++) {
+        tick(frame * 1000 / fps);
+        if (frame % (fps / 2) === 0) values.push([phone.style.transform, watch.style.transform]);
+      }
+      return values;
+    }, fps);
+  }
+  const numbers = value => value.match(/-?[\d.]+/g).map(Number);
+  const low = await sample(30);
+  const high = await sample(120);
+  expect(low.length).toBe(high.length);
+  // The first half second differs by one frame of start-up latency; afterwards the poses must match.
+  low.slice(1).forEach((pair, index) => pair.forEach((value, device) => {
+    const a = numbers(value), b = numbers(high[index + 1][device]);
+    a.forEach((n, i) => expect(Math.abs(n - b[i]), `frame ${index}, device ${device}`).toBeLessThan(.2));
+  }));
+  expect(low.at(-1)).not.toEqual(low[0]);
+});
+
+test('ambient device motion follows pause and reduced-motion preferences', async ({ page }) => {
+  await page.goto('/unbound/');
+  const phone = page.locator('.phone');
+  await expect.poll(() => phone.evaluate(node => getComputedStyle(node).animationName)).toBe('device-float');
+  await page.getByRole('button', { name: 'Pause motion' }).click();
+  expect(await phone.evaluate(node => getComputedStyle(node).animationPlayState)).toBe('paused');
+  expect(await page.locator('.transfer-chip').evaluate(node => getComputedStyle(node).opacity)).toBe('0');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(() => phone.evaluate(node => getComputedStyle(node).animationName)).toBe('none');
+});
+
+test('visible text is never smaller than 11px', async ({ page }) => {
+  for (const path of ['/unbound/', '/unbound/experience/']) {
+    await page.goto(path);
+    const small = await page.evaluate(() => [...document.querySelectorAll('body *')]
+      .filter(node => !node.closest('.device-canvas, .site-intro, [hidden]'))
+      .filter(node => [...node.childNodes].some(child => child.nodeType === 3 && child.textContent.trim()))
+      .filter(node => node.getClientRects().length && parseFloat(getComputedStyle(node).fontSize) < 11)
+      .map(node => `${node.className || node.tagName}: ${getComputedStyle(node).fontSize}`));
+    expect(small, path).toEqual([]);
+  }
+});
