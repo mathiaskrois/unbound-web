@@ -37,7 +37,8 @@ async function transforms(page) {
 
 test('renders branded assets, working navigation, and all public routes', async ({ page, request }) => {
   const errors = [];
-  page.on('pageerror', error => errors.push(error.message));
+  // Chromium reports a page transition it aborts (here, a second click while the first is still running) as an error of its own.
+  page.on('pageerror', error => { if (!/^Transition was aborted/.test(error.message)) errors.push(error.message); });
   const response = await page.goto('/unbound/');
   expect(response.status()).toBe(200);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your audio.On your Watch.');
