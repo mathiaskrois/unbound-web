@@ -42,7 +42,7 @@ test('spring is consistent across frame rates and resumes without a catch-up jum
   expect(Math.max(...a.slice(4).map(Math.abs))).toBeLessThan(9);
 });
 
-test('five-second prompt excludes hidden time; handoff waits for a frame and shares geometry', async ({ page }) => {
+test('1.5-second prompt excludes hidden time; handoff waits for a frame and shares geometry', async ({ page }) => {
   await page.addInitScript(() => {
     let callbacks = new Map(), next = 0;
     window.requestAnimationFrame = callback => { callbacks.set(++next, callback); return next; };
@@ -64,8 +64,8 @@ test('five-second prompt excludes hidden time; handoff waits for a frame and sha
     let time = 0;
     tick(time);
     const advance = frames => { for (let i = 0; i < frames; i++) tick(time += 1000 / 120); };
-    advance(599);
-    const beforeFive = overlay.classList.contains('is-ready');
+    advance(179);
+    const beforeReady = overlay.classList.contains('is-ready');
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });
     document.dispatchEvent(new Event('visibilitychange'));
     time += 60000;
@@ -75,7 +75,7 @@ test('five-second prompt excludes hidden time; handoff waits for a frame and sha
     tick(time);
     const afterHidden = overlay.classList.contains('is-ready');
     advance(1);
-    const atFive = overlay.classList.contains('is-ready');
+    const atReady = overlay.classList.contains('is-ready');
     const beforePress = logo.style.transform;
     overlay.querySelector('.intro-enter').click();
     const afterPress = logo.style.transform;
@@ -97,11 +97,11 @@ test('five-second prompt excludes hidden time; handoff waits for a frame and sha
     const expectedWidth = rotated ? Math.max(visualViewport.height, overlay.querySelector('.intro-viewport-measure').offsetHeight) : parseFloat(overlay.style.height) * video.videoWidth / video.videoHeight;
     const angle = Math.atan2(new DOMMatrix(getComputedStyle(video).transform).b, new DOMMatrix(getComputedStyle(video).transform).a) * 180 / Math.PI;
     const end = { rotated, finalWidth, expectedWidth, angle, state: overlay.dataset.state, opacity: video.style.opacity, transform: video.style.transform };
-    return { beforeFive, afterHidden, atFive, beforePress, afterPress, waiting, alignment, dissolved, end };
+    return { beforeReady, afterHidden, atReady, beforePress, afterPress, waiting, alignment, dissolved, end };
   });
-  expect(result.beforeFive).toBe(false);
+  expect(result.beforeReady).toBe(false);
   expect(result.afterHidden).toBe(false);
-  expect(result.atFive).toBe(true);
+  expect(result.atReady).toBe(true);
   expect(result.afterPress).toBe(result.beforePress);
   expect(result.waiting).toEqual({ hidden: false, opacity: '0', state: 'transformation' });
   expect(result.alignment.centerX).toBeLessThan(1);
