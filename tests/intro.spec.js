@@ -1,6 +1,8 @@
 const { test, expect } = require('@playwright/test');
 
-test('intro fades at the original animation endpoint and keeps playing through the fade', async ({ page }) => {
+test('intro fades at the original animation endpoint and keeps playing through the fade', async ({ page, browserName }) => {
+  // Playwright's WebKit builds for Linux and Windows cannot play the H.264/AAC intro, so playback never advances there.
+  test.skip(browserName === 'webkit' && process.platform !== 'darwin', 'WebKit outside macOS cannot play the H.264 intro');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/unbound/');
   await page.getByRole('button', { name: 'Enter Unbound, play video with sound' }).click();
@@ -17,13 +19,14 @@ test('intro fades at the original animation endpoint and keeps playing through t
       if (!overlay.classList.contains('is-finished')) return;
       observer.disconnect();
       window.fadeStart = { time: video.currentTime, paused: video.paused };
-      setTimeout(() => {
-        window.fadeProgress = {
-          time: video.currentTime,
-          paused: video.paused,
-          opacity: Number(getComputedStyle(overlay).opacity),
-        };
-      }, 250);
+      const samples = [];
+      const sample = () => {
+        samples.push({ time: video.currentTime, paused: video.paused, opacity: Number(getComputedStyle(overlay).opacity) });
+        const partial = samples.find(s => s.opacity > 0 && s.opacity < 1 && s.time > window.fadeStart.time + 0.1);
+        if (partial || !overlay.isConnected || samples.length > 40) window.fadeProgress = partial || samples.at(-1);
+        else setTimeout(sample, 25);
+      };
+      setTimeout(sample, 100);
     });
     observer.observe(overlay, { attributes: true, attributeFilter: ['class'] });
     return video.play();

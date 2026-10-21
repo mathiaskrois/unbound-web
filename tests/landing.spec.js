@@ -148,10 +148,13 @@ test('device choreography is identical at 30 and 120 fps', async ({ page }) => {
         for (const callback of batch.values()) callback(time);
       };
     });
-    await page.goto('/unbound/');
+    await page.goto('/unbound/', { waitUntil: 'load' });
+    await page.evaluate(() => document.fonts.ready);
     return page.evaluate(fps => {
       const phone = document.querySelector('.phone');
       const watch = document.querySelector('.watch');
+      // Both runs measure the settled layout before scrolling.
+      window.dispatchEvent(new Event('resize'));
       window.scrollTo({ top: 700, behavior: 'instant' });
       window.dispatchEvent(new Event('scroll'));
       const values = [];

@@ -4,7 +4,8 @@ module.exports = defineConfig({
   testDir: './tests',
   testIgnore: '**/*.test.mjs',
   fullyParallel: true,
-  workers: 3,
+  // One worker on CI: software-rendered WebKit drops frames when browsers compete for the CPU.
+  workers: process.env.CI ? 1 : 3,
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:8080',
