@@ -1,16 +1,4 @@
-:root {
-  color-scheme: dark;
-  --ink: #f7f7fb;
-  --muted: #b2b4c2;
-  --surface: rgba(255, 255, 255, .08);
-  --line: rgba(255, 255, 255, .13);
-  --blue: #76a7ff;
-  --violet: #af8cff;
-  --mint: #73e6cf;
-  --page: #0c0d16;
-  --shadow: 0 24px 60px rgba(0, 0, 0, .28);
-}
-
+/* Base layout for every page. Colours and type sizes come from tokens.css. */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {

@@ -1,3 +1,4 @@
+.experience-page .device-scene { --device-fill: .75; }
 .experience-page .chapter-intro h1 { font-size: clamp(54px, 5.8vw, 82px); }
 .walkthrough { background: #f0f1f8; color: #1b1e32; padding: 100px 0; border-radius: 36px 36px 0 0; }
 .walkthrough .eyebrow { color: #635591; }
@@ -11,7 +12,7 @@
 .journey-step strong { display: block; font-size: 22px; font-weight: 600; letter-spacing: -.035em; margin-bottom: 10px; }
 .journey-step strong + span { display: block; font-size: 14px; color: #676174; line-height: 1.7; }
 .journey-preview { position: relative; padding: 32px; border-radius: 28px; background: #141725; color: #f2f3ff; text-align: center; overflow: hidden; }
-.preview-eyebrow { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: #b9b1cd; }
+.preview-eyebrow { font-size: var(--text-label); letter-spacing: .1em; text-transform: uppercase; color: #b9b1cd; }
 .file-visual { width: 170px; height: 160px; margin: 25px auto 15px; position: relative; display: grid; place-items: center; }
 .file-orbit { position: absolute; inset: 0; border: 1px solid #7e739c55; border-radius: 50%; transform: rotate(-25deg) scaleX(1.25); }
 .file-glyph { position: relative; display: grid; place-items: center; width: 76px; height: 98px; border: 1px solid #b6a4e6; border-radius: 10px 24px 10px 10px; background: #49405f; color: #e8dfff; font-weight: 650; letter-spacing: .1em; font-size: 15px; transform: rotate(-9deg); transition: transform .5s, background .5s; }
@@ -30,7 +31,7 @@
 .preview-status { min-height: 106px; padding: 21px 12px; border-top: 1px solid #ffffff18; }
 .preview-status strong { font-weight: 550; font-size: 15px; }
 .preview-status p { margin: 8px auto 0; font-size: 12px; line-height: 1.6; color: #b8b3c8; max-width: 300px; }
-.preview-note { margin: 10px 0 0; font-size: 10px; line-height: 1.6; color: #b0aabd; }
+.preview-note { margin: 10px 0 0; font-size: var(--text-small); line-height: 1.6; color: #b0aabd; }
 .no-script-note { color: #676174; margin-top: 25px; }
 .listening-tools { padding: 100px 0; }
 .listening-tools .section-heading h2 span { color: var(--violet); }
@@ -47,7 +48,7 @@
 .watch-invitation h2 { font-size: clamp(40px, 5.5vw, 75px); line-height: 1.07; letter-spacing: -.05em; font-weight: 580; }
 .watch-invitation h2 span { color: var(--violet); }
 .watch-invitation p:not(.eyebrow) { max-width: 510px; margin: 25px auto; color: #b4b1c7; font-size: 14px; line-height: 1.8; }
-.watch-invitation p.trial-note { font-size: 11px; }
+.watch-invitation p.trial-note { font-size: var(--text-small); }
 .watch-invitation .primary-link { width: fit-content; margin: 30px auto 0; }
 @media (max-width: 900px) { .walkthrough { padding: 65px 0; } .walkthrough-layout { grid-template-columns: 1fr; gap: 25px; } .journey-step { padding: 20px 16px; gap: 14px; } .journey-step strong { font-size: 20px; } .tool-grid { grid-template-columns: 1fr 1fr; gap: 30px; } .experience-page .chapter-intro h1 { font-size: clamp(53px, 11vw, 80px); } }
 @media (max-width: 420px) { .tool-grid { grid-template-columns: 1fr; } .journey-preview { padding: 25px 20px; } .watch-invitation .primary-link { gap: 15px; font-size: 12px; } }
