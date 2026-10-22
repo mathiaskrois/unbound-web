@@ -2,6 +2,20 @@
 
 Independent promotional website for the Unbound app, published at `https://krois.dk/unbound/`. The iPhone/Watch app is a separate repository and is not built or deployed by this website.
 
+## Project layout
+
+| Path | What it is |
+| --- | --- |
+| `unbound/index.html`, `unbound/experience/` | The two story pages (home and the Apple Watch experience). |
+| `unbound/privacy/`, `unbound/terms/`, `unbound/support/` | Policy and support pages. |
+| `unbound/assets/unbound.css` | Design system shared by every page: tokens, type, glass navigation, buttons, footer, article layout. |
+| `unbound/assets/story.css`, `story.js` | Story-page layout and engine: aurora, waveforms, scroll choreography, device stage, motion control. |
+| `unbound/assets/devices.css`, `unbound/partials/device-canvas.html` | The CSS iPhone and Apple Watch (fallback and no-JavaScript composition), included in both story pages at build time. |
+| `devices-3d/devices-3d.js` | Source of the real-time 3D devices; bundled with three.js into `assets/devices-3d.js` by the build. |
+| `unbound/assets/intro.css`, `intro.js`, `intro.mp4`, `watch-icon.webp` | The once-per-session homepage entrance. |
+| `scripts/build-site.mjs`, `scripts/preview.mjs` | Build into `dist/` (partials, 3D bundle, asset hashes) and the local preview server. |
+| `tests/` | Playwright browser tests (`landing.spec.js`, `intro.spec.js`, `intro-motion.spec.js`). |
+
 ## Local preview
 
 Run `npm run preview` from this directory, then open `http://127.0.0.1:8080/unbound/`. It builds `dist/` and serves it at the public `/unbound/` mount with Node, so shared partials and asset versions match production.
@@ -29,7 +43,7 @@ The copy retains prelaunch availability. Replace the coming-soon labels with the
 
 `intro.js` and `intro.css` show a once-per-session Watch-logo entrance. The round `watch-icon.webp` (480 px, for display at up to 240 CSS px) comes from the companion app's Watch AppIcon asset. A 120 Hz fixed-step damped spring handles landing and hover; the in-place transformation preserves velocity while aligning the icon’s inner symbol with the video. Background tabs suspend the animation clock. Entry by pointer, Enter, or Space starts unmuted video in the activation handler; rejected audible playback retries muted. Failures reveal the homepage. Skip, Escape, focus isolation/restoration, reduced motion, anchor links, and the no-JavaScript homepage remain supported. The prompt fades in after 1.5 visible seconds, once the logo has landed; early entry remains available. A decoded video frame starts the 180 ms icon dissolve and 550 ms expansion to full-screen framing. The MP4 starts 0.5 seconds into the original source, with audio trimmed identically. Playback continues during the 0.6-second final fade, starting at media time 4.0 seconds (the original 4.5-second animation endpoint). Portrait touch layouts up to 900 CSS pixels wide rotate the aligned artwork 90° anticlockwise in 350 ms. During the intro, viewport-fit=cover enables edge-to-edge layout; the original viewport setting is restored on completion. Mobile artwork uses 100lvh. Browser-tab framing centers the artwork and controls in the visual viewport, including its offset; standalone mode retains its full-height stage. An oversized black backing, hidden page siblings, and a black root prevent Safari from exposing the homepage beneath its translucent controls. Viewport/theme metadata are restored only after the final fade. The video’s original width fills the large viewport height, accepting cropping on tall phones. Controls stay upright; landscape and desktop playback stay upright. Viewport/orientation changes retarget framing over 350 ms without restarting playback. The prompt matches the site: a frosted-glass pill with a live equaliser and "Press to enter" ("Tap to enter" on touch screens) in system type with a shimmering aurora gradient; it rises and sharpens in when the logo has landed. A dark aurora (a blue core matching the logo, with drifting violet and mint) breathes behind the logo, and a pool of the logo's light lies beneath it, brightening as the logo lands and following its hover. The atmosphere fades to pure black before the video grows, so the video's black frame never shows. Skip and sound controls are glass pills; the sound control shows a speaker icon for its state.
 
-Refresh the intro stylesheet/script query strings when changing the entrance. Browser tests cover playback failures, early/repeated entry, focus, session bypass, media-time fading, frame-rate consistency, and tab suspension. Playwright's desktop/mobile WebKit profiles are engine tests, not physical iPhone Safari validation.
+The build versions every asset referenced from HTML automatically. `intro.js` loads `watch-icon.webp` and `intro.mp4` itself, so bump their `?v=` query strings in `intro.js` when replacing either file. Browser tests cover playback failures, early/repeated entry, focus, session bypass, media-time fading, frame-rate consistency, and tab suspension. Playwright's desktop/mobile WebKit profiles are engine tests, not physical iPhone Safari validation.
 
 ## Browser checks
 
@@ -39,12 +53,12 @@ npx playwright install chromium webkit
 npm test
 ```
 
-Tests cover Chromium, desktop WebKit, and an iPhone WebKit profile: navigation, public routes, scroll transforms, pause/resume, reduced-motion changes, idle animation updates, responsive overflow, keyboard access, axe WCAG checks, and the no-JavaScript fallback. Test dependencies are development-only.
+Tests cover Chromium, desktop WebKit, and an iPhone WebKit profile: navigation, public routes, the walkthrough, scroll poses, pause/resume, reduced-motion changes, idle DOM updates, frame-rate-independent choreography, the device stage's fit and the 3D-or-CSS choice, header layout at phone widths, responsive overflow, keyboard access, axe WCAG checks, minimum text size, the no-JavaScript fallback, and the entrance. On a Mac, Playwright's WebKit has a real GPU and renders the 3D devices; headless Chromium only has software WebGL (SwiftShader) and exercises the CSS fallback, so both paths are covered. The suite takes about 1.5 minutes and runs locally only; CI just builds. Playwright WebKit is not real Safari: check visual or Safari-specific changes in Safari itself (for example by enabling Develop → Allow Remote Automation and driving it with `safaridriver`). Test dependencies are development-only.
 
 ## Build and publishing
 
 Run `npm ci` and `npm run build`. `dist/` contains only the public website and is mounted at `/unbound/`. Local previews serve the built `dist/` directory at http://127.0.0.1:8080/unbound/. CI only checks that the site builds; run the Playwright suite locally with `npm test` before pushing.
 
-After pushing and verifying a source commit, update only `unbound-web.commit` in sibling `krois-site/releases.json` and push the publishing repo. Its GitHub Pages workflow builds the recorded release. The app repository stays at `/Users/mathiaskroismoller/Git/Unbound/`; this website owns its published assets and requires no app checkout to build.
+After pushing and verifying a source commit, update only `unbound-web.commit` in sibling `krois-site/releases.json` and push the publishing repo. Its GitHub Pages workflow builds the recorded release, usually within a minute; `https://krois.dk/unbound/release.json` shows the commit that is live. To roll back, record an earlier commit the same way. Browsers may keep a page for up to ten minutes (GitHub Pages caching); a hard reload shows the new release at once. The app repository stays at `/Users/mathiaskroismoller/Git/Unbound/`; this website owns its published assets and requires no app checkout to build.
 
 The extracted history preserves the website changes; hashes changed during extraction. The original shared history and unpublished historical icon commit remain in `mathiaskrois/krois-site`.

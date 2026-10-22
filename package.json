@@ -1,6 +1,7 @@
 {
   "name": "unbound-web",
   "private": true,
+  "description": "Promotional website for the Unbound app, published at https://krois.dk/unbound/",
   "scripts": {
     "build": "node scripts/build-site.mjs",
     "preview": "node scripts/build-site.mjs && node scripts/preview.mjs",
