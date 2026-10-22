@@ -9,13 +9,13 @@ const partials=fileURLToPath(new URL('unbound/partials/',root));
 await rm(output,{recursive:true,force:true});
 await cp(new URL('unbound/',root),output,{recursive:true,filter:source=>!resolve(source).startsWith(resolve(partials))});
 
-// The real-time 3D devices: three.js and the models, tree-shaken into one module that landing.js
-// imports on demand. landing.js names it once; the build stamps that name with a content hash.
+// The real-time 3D devices: three.js and the models, tree-shaken into one module that story.js
+// imports on demand. story.js names it once; the build stamps that name with a content hash.
 const devices3d=join(output,'assets/devices-3d.js');
 await build({entryPoints:[fileURLToPath(new URL('devices-3d/devices-3d.js',root))],bundle:true,format:'esm',minify:true,target:['es2020','safari15'],legalComments:'eof',outfile:devices3d,logLevel:'warning'});
-const landing=join(output,'assets/landing.js');
+const story=join(output,'assets/story.js');
 const devicesHash=createHash('sha256').update(await readFile(devices3d)).digest('hex').slice(0,10);
-await writeFile(landing,(await readFile(landing,'utf8')).replace("'devices-3d.js'",`'devices-3d.js?v=${devicesHash}'`));
+await writeFile(story,(await readFile(story,'utf8')).replace("'devices-3d.js'",`'devices-3d.js?v=${devicesHash}'`));
 
 // Pages share markup through <!-- include:name --> markers; {{root}} is the page's relative path to the site root.
 async function* pages(directory){

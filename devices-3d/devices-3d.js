@@ -6,7 +6,7 @@
 import {
   ACESFilmicToneMapping, AddOperation, AdditiveBlending, BoxGeometry, BufferGeometry, CanvasTexture, CircleGeometry, Color,
   CylinderGeometry, DirectionalLight, ExtrudeGeometry, Float32BufferAttribute, Group, HemisphereLight,
-  Mesh, MeshBasicMaterial, MeshPhysicalMaterial, PCFSoftShadowMap, PerspectiveCamera,
+  Mesh, MeshBasicMaterial, MeshPhysicalMaterial, PCFShadowMap, PerspectiveCamera,
   PMREMGenerator, RepeatWrapping, Scene, Shape, ShapeGeometry, SRGBColorSpace, Vector3,
   WebGLRenderer, CatmullRomCurve3,
 } from 'three';
@@ -370,7 +370,7 @@ export async function createDevices3D({ host, capture, icon, colors, onLost }) {
   renderer.toneMappingExposure = 1.05;
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = PCFSoftShadowMap;
+  renderer.shadowMap.type = PCFShadowMap;
   renderer.setClearColor(0x000000, 0);
   renderer.autoClear = false;
 

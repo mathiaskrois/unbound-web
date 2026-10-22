@@ -4,7 +4,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 test('experience navigation and own-file Watch walkthrough', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/unbound/');
-  await page.getByRole('link', { name: 'The experience', exact: true }).click();
+  await page.getByRole('link', { name: 'Explore the experience' }).click();
   await expect(page).toHaveURL(/\/experience\/$/);
   await page.getByRole('link', { name: 'See how it works' }).click();
   for (const [label, state, title] of [
@@ -44,10 +44,11 @@ test('renders branded assets, working navigation, and all public routes', async 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your audio.On your Watch.');
   await expect.poll(() => page.locator('img:not([loading="lazy"])').evaluateAll(images => images.every(img => img.complete && img.naturalWidth > 0))).toBe(true);
   await page.getByRole('link', { name: 'Explore the experience' }).click();
-  await expect(page).toHaveURL(/\/experience\/$/);
+  // The cross-page view transition snapshots the WebGL stage; with three GPU browsers in parallel that can take a while.
+  await expect(page).toHaveURL(/\/experience\/$/, { timeout: 10000 });
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your files.Your wrist.Your world.');
   await page.getByRole('link', { name: 'Coming soon', exact: true }).click();
-  await expect(page.locator('#availability')).toBeInViewport();
+  await expect(page.locator('#invitation')).toBeInViewport();
   for (const path of ['privacy', 'terms', 'support']) {
     const response = await request.get(`/unbound/${path}`);
     expect(response.status()).toBe(200);
@@ -97,7 +98,7 @@ test('reduced motion is static on load and after preference changes', async ({ p
   await jump(page, 600);
   expect(await transforms(page)).toEqual(before);
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior)).toBe('auto');
-  expect(await page.locator('[data-reveal]').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).opacity === '1'))).toBe(true);
+  expect(await page.locator('.reveal').evaluateAll(nodes => nodes.every(node => getComputedStyle(node).opacity === '1'))).toBe(true);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await expect(page.locator('.motion-toggle')).toBeVisible();
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -125,7 +126,7 @@ test('device stage reveals real-time 3D devices on a GPU and CSS devices otherwi
     const info = gl && gl.getExtension('WEBGL_debug_renderer_info');
     return info ? `${gl.getParameter(info.UNMASKED_RENDERER_WEBGL)}` : '';
   });
-  const webgl = await page.locator('.device-scene').evaluate(node => node.classList.contains('webgl-devices'));
+  const webgl = await page.locator('.device-host').evaluate(node => node.classList.contains('webgl-devices'));
   // Headless Chromium only has software WebGL (SwiftShader), which must fall back to the CSS devices.
   expect(webgl).toBe(Boolean(gpu) && !/swiftshader|llvmpipe|software/i.test(gpu));
   if (webgl) {
@@ -146,10 +147,10 @@ test('device stage is upright and scaled to fit its scene', async ({ page }) => 
     for (const [width, height] of [[390, 844], [768, 1024], [1100, 800], [1440, 900], [1920, 1080]]) {
       await page.setViewportSize({ width, height });
       await expect.poll(() => page.evaluate(() => {
-        const scene = document.querySelector('.device-scene');
-        const { width, height } = scene.getBoundingClientRect();
-        const style = getComputedStyle(scene);
-        const expected = Math.min(parseFloat(style.getPropertyValue('--device-max')), height * parseFloat(style.getPropertyValue('--device-fill')) / 680, width * 1.14 / 540);
+        // The stage fills a share of the viewport height (less on phones), bounded by its width and a maximum.
+        const style = getComputedStyle(document.querySelector('.device-host'));
+        const fill = innerWidth <= 860 ? .78 : parseFloat(style.getPropertyValue('--device-fill'));
+        const expected = Math.min(parseFloat(style.getPropertyValue('--device-max')), innerHeight * fill / 680, innerWidth * 1.1 / 540);
         const matrix = new DOMMatrix(getComputedStyle(document.querySelector('.device-canvas')).transform);
         return expected > 0 && matrix.a > 0 && matrix.a === matrix.d && Math.abs(matrix.a - expected) < .002;
       }), `${path} at ${width}×${height}`).toBe(true);
@@ -164,12 +165,11 @@ test('header navigation stays on one row inside the bar at phone widths', async 
       await page.setViewportSize({ width, height: 800 });
       const layout = await page.evaluate(() => {
         const box = node => node.getBoundingClientRect();
-        const header = box(document.querySelector('.site-header'));
-        const shell = box(document.querySelector('.site-header .shell'));
-        const brand = box(document.querySelector('.site-header .brand'));
-        const links = [...document.querySelectorAll('.site-header nav a')].filter(link => link.offsetWidth).map(box);
+        const bar = box(document.querySelector('.site-nav'));
+        const brand = box(document.querySelector('.site-nav .brand'));
+        const links = [...document.querySelectorAll('.site-nav nav a, .site-nav .motion-toggle')].filter(link => link.offsetWidth).map(box);
         return {
-          inside: links.every(link => link.top >= header.top && link.bottom <= header.bottom && link.right <= shell.right + 0.5),
+          inside: links.every(link => link.top >= bar.top && link.bottom <= bar.bottom && link.left >= bar.left && link.right <= bar.right + 0.5),
           oneRow: links.every(link => Math.abs(link.top + link.height / 2 - (links[0].top + links[0].height / 2)) < 2),
           clearOfBrand: links.every(link => link.left >= brand.right),
         };
@@ -198,7 +198,8 @@ test('content remains available without JavaScript', async ({ browser }) => {
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.locator('.motion-toggle')).toBeHidden();
   await page.locator('#features').scrollIntoViewIfNeeded();
-  await expect(page.getByRole('heading', { name: 'Bring your own world.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'A library that feels like you.' })).toBeVisible();
+  await expect(page.locator('.phone')).toBeVisible();
   await context.close();
 });
 
@@ -219,6 +220,8 @@ test('device choreography is identical at 30 and 120 fps', async ({ context }) =
     });
     await page.goto('/unbound/', { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
+    // The stage renders its first pose when it is revealed (once its devices are ready).
+    await page.waitForFunction(() => document.querySelector('.phone').style.transform !== '');
     const values = await page.evaluate(fps => {
       const phone = document.querySelector('.phone');
       const watch = document.querySelector('.watch');
@@ -227,7 +230,7 @@ test('device choreography is identical at 30 and 120 fps', async ({ context }) =
       window.scrollTo({ top: 700, behavior: 'instant' });
       window.dispatchEvent(new Event('scroll'));
       const values = [];
-      for (let frame = 1; frame <= fps * 2; frame++) {
+      for (let frame = 1; frame <= fps * 3; frame++) {
         tick(frame * 1000 / fps);
         if (frame % (fps / 2) === 0) values.push([phone.style.transform, watch.style.transform]);
       }
@@ -240,9 +243,10 @@ test('device choreography is identical at 30 and 120 fps', async ({ context }) =
   const low = await sample(30);
   const high = await sample(120);
   expect(low.length).toBe(high.length);
-  // The first half second differs by one frame of start-up latency; afterwards the poses must match.
-  low.slice(1).forEach((pair, index) => pair.forEach((value, device) => {
-    const a = numbers(value), b = numbers(high[index + 1][device]);
+  // Each run starts on its own first frame (one frame of start-up latency, 25 ms apart); once the
+  // entrance glide has settled (from 1.5 s), the poses must match whatever the refresh rate.
+  low.slice(2).forEach((pair, index) => pair.forEach((value, device) => {
+    const a = numbers(value), b = numbers(high[index + 2][device]);
     a.forEach((n, i) => expect(Math.abs(n - b[i]), `frame ${index}, device ${device}`).toBeLessThan(.2));
   }));
   expect(low.at(-1)).not.toEqual(low[0]);
