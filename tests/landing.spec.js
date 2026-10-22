@@ -115,6 +115,31 @@ test('no horizontal overflow across phone, tablet, landscape, and desktop widths
   }
 });
 
+test('device stage reveals real-time 3D devices on a GPU and CSS devices otherwise', async ({ page, browserName }) => {
+  await page.addInitScript(() => sessionStorage.setItem('unbound-intro-seen', '1'));
+  await page.goto('/unbound/');
+  await expect(page.locator('html')).not.toHaveClass(/stage-pending/, { timeout: 6000 });
+  await expect.poll(() => page.locator('.device-canvas').evaluate(node => getComputedStyle(node).opacity)).toBe('1');
+  const gpu = await page.evaluate(() => {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    const info = gl && gl.getExtension('WEBGL_debug_renderer_info');
+    return info ? `${gl.getParameter(info.UNMASKED_RENDERER_WEBGL)}` : '';
+  });
+  const webgl = await page.locator('.device-scene').evaluate(node => node.classList.contains('webgl-devices'));
+  // Headless Chromium only has software WebGL (SwiftShader), which must fall back to the CSS devices.
+  expect(webgl).toBe(Boolean(gpu) && !/swiftshader|llvmpipe|software/i.test(gpu));
+  if (webgl) {
+    await expect(page.locator('.device-gl')).toBeVisible();
+    await expect(page.locator('.phone')).toBeHidden();
+    // The rendered stage is not empty: the device pixels differ clearly from the page background.
+    const shot = await page.locator('.device-canvas').screenshot();
+    expect(shot.length).toBeGreaterThan(40000);
+  } else {
+    await expect(page.locator('.device-gl')).toHaveCount(0);
+    await expect(page.locator('.phone')).toBeVisible();
+  }
+});
+
 test('device stage is upright and scaled to fit its scene', async ({ page }) => {
   for (const path of ['/unbound/', '/unbound/experience/']) {
     await page.goto(path);

@@ -16,6 +16,13 @@
   perspective: 1300px;
   transform: scale(var(--device-scale, .9));
 }
+/* The stage fades in once landing.js has the devices ready (3D or CSS), in their entrance pose. */
+.device-canvas { transition: opacity .7s cubic-bezier(.22, 1, .36, 1); }
+.stage-pending .device-canvas { opacity: 0; animation: stage-failsafe 0s 5s forwards; }
+@keyframes stage-failsafe { to { opacity: 1; } }
+/* The WebGL canvas overhangs the stage by 170px on every side, so shadows and the band are not cut off. */
+.device-gl { position: absolute; left: -170px; top: -170px; width: 880px; height: 1020px; pointer-events: none; }
+.webgl-devices .device { visibility: hidden; }
 /* Without JavaScript the stage keeps a conservative per-width scale. */
 @media (max-width: 900px) { .device-scene { --device-scale: .7; } }
 @media (max-width: 480px) { .device-scene { --device-scale: .55; } }
@@ -160,4 +167,5 @@
 @media (prefers-reduced-motion: reduce) {
   .motion-ready .device, .motion-ready .tiny-wave i, .motion-ready .watch-progress > span { animation: none; }
   .transfer-chip, .device-sheen { display: none; }
+  .device-canvas { transition: none; }
 }

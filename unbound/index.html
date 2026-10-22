@@ -24,6 +24,8 @@
   <link rel="stylesheet" href="assets/landing.css">
   <link rel="stylesheet" href="assets/devices.css">
   <link rel="stylesheet" href="assets/home.css">
+  <!-- Hide the device stage from the first paint until landing.js has it ready (devices.css shows it after 5 s regardless). -->
+  <script>document.documentElement.classList.add('stage-pending');</script>
   <script src="assets/motion.js" defer></script>
   <script src="assets/landing.js" defer></script>
   <link rel="stylesheet" href="assets/intro.css">
