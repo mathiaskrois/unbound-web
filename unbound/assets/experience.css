@@ -53,7 +53,7 @@
 .watch-invitation p:not(.eyebrow) { max-width: 510px; margin: 25px auto; color: #b4b1c7; font-size: 14px; line-height: 1.8; }
 .watch-invitation p.trial-note { font-size: var(--text-small); }
 .watch-invitation .primary-link { width: fit-content; margin: 30px auto 0; }
-@media (max-width: 900px) { .walkthrough { padding: 65px 0; } .walkthrough-layout { grid-template-columns: 1fr; gap: 25px; } .journey-step { padding: 20px 16px; gap: 14px; } .journey-step strong { font-size: 20px; } .tool-grid { grid-template-columns: 1fr 1fr; gap: 30px; } .experience-page .chapter-intro h1 { font-size: clamp(53px, 11vw, 80px); } }
+@media (max-width: 900px) { .experience-page .motion-toggle { right: 0; top: 24px; bottom: auto; } .walkthrough { padding: 65px 0; } .walkthrough-layout { grid-template-columns: 1fr; gap: 25px; } .journey-step { padding: 20px 16px; gap: 14px; } .journey-step strong { font-size: 20px; } .tool-grid { grid-template-columns: 1fr 1fr; gap: 30px; } .experience-page .chapter-intro h1 { font-size: clamp(53px, 11vw, 80px); } }
 @media (max-width: 420px) { .tool-grid { grid-template-columns: 1fr; } .journey-preview { padding: 25px 20px; } .watch-invitation .primary-link { gap: 15px; font-size: 12px; } }
 @media (prefers-reduced-motion: reduce) { .journey-step, .file-glyph, .file-check, .route-line::after { transition: none; } }
 .motion-paused .journey-step, .motion-paused .file-glyph, .motion-paused .file-check, .motion-paused .route-line::after { transition: none; }

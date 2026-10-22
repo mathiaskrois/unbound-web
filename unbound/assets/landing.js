@@ -35,21 +35,23 @@
   let sceneVisible = true;
   let geometry;
   let entranceStarted = false;
+  let entranceShown = false;
   const isStatic = () => paused || reducedMotion.matches;
 
   // Chapter beats: hero, "All yours" (the phone turns to face you), and "Leave your phone"
-  // (the phone steps back while the watch rises forward). Angles in degrees, offsets in px.
+  // (the phone turns away, showing its titanium side, while the watch rises forward and
+  // turns its crown toward you). Angles in degrees, offsets in px; d dims the phone screen.
   const PHONE = [
-    [0, { x: 0, y: 0, z: 0, rx: 7, ry: -14, rz: -8, s: 1, o: 1 }],
-    [.42, { x: -14, y: -14, z: 0, rx: 3, ry: -5, rz: -3, s: 1.03, o: 1 }],
-    [.92, { x: -34, y: -18, z: -40, rx: -4, ry: 10, rz: 4, s: .9, o: .7 }],
-    [1, { x: -34, y: -18, z: -40, rx: -4, ry: 10, rz: 4, s: .9, o: .7 }],
+    [0, { x: 0, y: 0, z: 0, rx: 7, ry: -16, rz: -8, s: 1, d: 0 }],
+    [.42, { x: -14, y: -14, z: 0, rx: 3, ry: -4, rz: -3, s: 1.03, d: 0 }],
+    [.92, { x: -40, y: -18, z: -60, rx: -3, ry: 24, rz: 4, s: .9, d: .38 }],
+    [1, { x: -40, y: -18, z: -60, rx: -3, ry: 24, rz: 4, s: .9, d: .38 }],
   ];
   const WATCH = [
-    [0, { x: 0, y: 0, z: 70, rx: 8, ry: -17, rz: 13, s: 1 }],
-    [.42, { x: -8, y: -40, z: 70, rx: 5, ry: -11, rz: 8, s: 1.02 }],
-    [.92, { x: -26, y: -158, z: 110, rx: -4, ry: 8, rz: -9, s: 1.18 }],
-    [1, { x: -26, y: -158, z: 110, rx: -4, ry: 8, rz: -9, s: 1.18 }],
+    [0, { x: 0, y: 0, z: 70, rx: 8, ry: -20, rz: 13, s: 1 }],
+    [.42, { x: -8, y: -40, z: 70, rx: 5, ry: -12, rz: 8, s: 1.02 }],
+    [.92, { x: -26, y: -158, z: 110, rx: -2, ry: -26, rz: -9, s: 1.18 }],
+    [1, { x: -26, y: -158, z: 110, rx: -2, ry: -26, rz: -9, s: 1.18 }],
   ];
 
   const progress = spring(0, { stiffness: 70, precision: 5e-4 });
@@ -73,8 +75,11 @@
     animator.wake();
   }
 
+  // The entrance (e from 1 to 0) rises from below and further back while swinging round.
   const transform = (d, e, tx, ty, depth) =>
-    `translate3d(${d.x + ty * depth * 1.4}px, ${d.y - tx * depth + e * 46}px, ${d.z}px) rotateX(${d.rx + tx + e * 7}deg) rotateY(${d.ry + ty}deg) rotateZ(${d.rz - e * 2}deg) scale(${d.s})`;
+    `translate3d(${d.x + ty * depth * 1.4}px, ${d.y - tx * depth + e * 70}px, ${d.z - e * 160}px) rotateX(${d.rx + tx + e * 12}deg) rotateY(${d.ry + ty - e * 28}deg) rotateZ(${d.rz - e * 4}deg) scale(${d.s})`;
+  // The polished lip's highlight follows the turn, as a studio light would.
+  const spec = (d, tx, ty) => `${(215 + (d.ry + ty) * 2.4 - (d.rx + tx) * 1.2).toFixed(1)}deg`;
 
   function render() {
     const p = progress.value;
@@ -85,10 +90,11 @@
     const b = pose(WATCH, p);
     if (mobile.matches) { a.x *= .4; b.x *= .4; }
     phone.style.transform = transform(a, e, tx, ty, 1);
-    phone.style.opacity = a.o.toFixed(3);
+    phone.style.setProperty('--dim', a.d.toFixed(3));
+    phone.style.setProperty('--spec', spec(a, tx, ty));
     watch.style.transform = transform(b, e * 1.25, tx, ty, 1.6);
-    // The side of the enclosure that faces the viewer follows the phone's turn.
-    phone.style.setProperty('--edge', `${clamp(-(a.ry + ty) * .45, -4, 7).toFixed(2)}px`);
+    watch.style.setProperty('--spec', spec(b, tx, ty));
+    if (entranceShown && e < .02) scene.classList.add('devices-arrived');
     // Studio light: reflections slide across the glass as the devices turn.
     if (phoneGlare) phoneGlare.style.transform = `translate3d(${(-(a.ry + ty) * 4).toFixed(1)}px, ${((a.rx + tx) * 5).toFixed(1)}px, 0)`;
     if (watchGlare) watchGlare.style.transform = `translate3d(${(-(b.ry + ty) * 3).toFixed(1)}px, ${((b.rx + tx) * 4).toFixed(1)}px, 0)`;
@@ -111,7 +117,7 @@
 
   function clearStyles() {
     for (const node of [phone, watch, phoneGlare, watchGlare, chip]) if (node) { node.style.removeProperty('transform'); node.style.removeProperty('opacity'); }
-    phone.style.removeProperty('--edge');
+    for (const property of ['--dim', '--spec']) { phone.style.removeProperty(property); watch.style.removeProperty(property); }
   }
 
   function syncMotion() {
@@ -135,6 +141,7 @@
     if (root.classList.contains('intro-playing')) return;
     entranceStarted = true;
     if (window.scrollY > window.innerHeight * .5) return;
+    entranceShown = true;
     entrance.snap(1);
     entrance.target = 0;
     render();

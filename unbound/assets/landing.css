@@ -1,5 +1,7 @@
 /* Landing-only styles; policy and support pages use site.css. */
 .landing { background: var(--page); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+/* The 3D devices may overhang the window edge on narrow desktops; clip (unlike hidden) keeps the scene sticky. */
+.landing main { overflow-x: clip; }
 .landing .shell { width: min(1240px, calc(100% - 96px)); }
 .landing h1, .landing h2, .landing h3 { text-wrap: balance; }
 .landing a, .motion-toggle { -webkit-tap-highlight-color: transparent; }
@@ -161,7 +163,7 @@
 /* Moving between the home and experience pages, the devices glide to their new place. */
 @view-transition { navigation: auto; }
 .landing .brand:not(.footer-brand) { view-transition-name: unbound-brand; }
-.phone { view-transition-name: unbound-phone; }
-.watch { view-transition-name: unbound-watch; }
+/* Named on the stage, not the devices: a view-transition-name flattens 3D, which would hide their depth. */
+.device-canvas { view-transition-name: unbound-devices; }
 ::view-transition-group(*) { animation-duration: .55s; animation-timing-function: var(--ease-out); }
 @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
