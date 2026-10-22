@@ -141,18 +141,16 @@
   .home-page .footer-inner { gap: 26px; }
 }
 @media (max-width: 480px) {
-  .home-page nav { gap: 10px; }
-  .landing nav .nav-cta { padding-inline: 10px; gap: 6px; }
+  .home-page .landing-nav { gap: 8px; }
+  .home-page nav { gap: 8px; font-size: var(--text-label); }
+  .home-page .nav-cta { padding-inline: 9px; }
   .home-page .device-scene { height: 530px; }
   .home-page .scene-atmosphere { inset: 45px 0 82px; }
 }
 @media (max-width: 360px) {
   .home-page .shell { width: calc(100% - 32px); }
-  .home-page .landing-nav { gap: 8px; }
-  .home-page .brand { font-size: 20px; gap: 6px; }
-  .home-page .brand img { width: 24px; height: 24px; }
-  .home-page nav { gap: 9px; font-size: var(--text-label); }
-  .home-page .nav-cta { font-size: var(--text-label); padding-inline: 9px; gap: 6px; }
+  .home-page .brand { font-size: 18px; gap: 6px; }
+  .home-page .brand img { width: 22px; height: 22px; }
   .home-page h1 { font-size: 63px; }
   .home-page .device-scene { height: 475px; }
   .home-page .chapter h2 { font-size: 42px; }

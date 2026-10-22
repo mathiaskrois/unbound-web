@@ -114,6 +114,28 @@ test('no horizontal overflow across phone, tablet, landscape, and desktop widths
   }
 });
 
+test('header navigation stays on one row inside the bar at phone widths', async ({ page }) => {
+  for (const path of ['/unbound/', '/unbound/experience/']) {
+    await page.goto(path);
+    for (const width of [320, 360, 375, 390, 430, 480]) {
+      await page.setViewportSize({ width, height: 800 });
+      const layout = await page.evaluate(() => {
+        const box = node => node.getBoundingClientRect();
+        const header = box(document.querySelector('.site-header'));
+        const shell = box(document.querySelector('.site-header .shell'));
+        const brand = box(document.querySelector('.site-header .brand'));
+        const links = [...document.querySelectorAll('.site-header nav a')].filter(link => link.offsetWidth).map(box);
+        return {
+          inside: links.every(link => link.top >= header.top && link.bottom <= header.bottom && link.right <= shell.right + 0.5),
+          oneRow: links.every(link => Math.abs(link.top + link.height / 2 - (links[0].top + links[0].height / 2)) < 2),
+          clearOfBrand: links.every(link => link.left >= brand.right),
+        };
+      });
+      expect(layout, `${path} at ${width}px`).toEqual({ inside: true, oneRow: true, clearOfBrand: true });
+    }
+  }
+});
+
 test('keyboard access and WCAG accessibility checks', async ({ page, browserName }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/unbound/');
