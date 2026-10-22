@@ -39,7 +39,7 @@ Tests cover Chromium, desktop WebKit, and an iPhone WebKit profile: navigation, 
 
 ## Build and publishing
 
-Run `npm ci` and `npm run build`. `dist/` contains only the public website and is mounted at `/unbound/`. Local previews serve the built `dist/` directory at http://127.0.0.1:8080/unbound/. CI builds and runs the Playwright suite on every push and pull request.
+Run `npm ci` and `npm run build`. `dist/` contains only the public website and is mounted at `/unbound/`. Local previews serve the built `dist/` directory at http://127.0.0.1:8080/unbound/. CI only checks that the site builds; run the Playwright suite locally with `npm test` before pushing.
 
 After pushing and verifying a source commit, update only `unbound-web.commit` in sibling `krois-site/releases.json` and push the publishing repo. Its GitHub Pages workflow builds the recorded release. The app repository stays at `/Users/mathiaskroismoller/Git/Unbound/`; this website owns its published assets and requires no app checkout to build.
 
