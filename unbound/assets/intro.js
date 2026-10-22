@@ -23,12 +23,14 @@
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', 'Welcome to Unbound');
-  overlay.innerHTML = '<video playsinline preload="auto" aria-hidden="true"></video><div class="intro-glow"></div><img class="intro-logo" alt="" aria-hidden="true"><button class="intro-enter" type="button" aria-label="Enter Unbound, play video with sound"><span class="intro-prompt">press to enter</span></button><button class="intro-sound" type="button" hidden>Sound off</button><button class="intro-skip" type="button">Skip intro</button>';
+  overlay.innerHTML = '<video playsinline preload="auto" aria-hidden="true"></video><div class="intro-glow"></div><div class="intro-halo" aria-hidden="true"></div><img class="intro-logo" alt="" aria-hidden="true"><button class="intro-enter" type="button" aria-label="Enter Unbound, play video with sound"><span class="intro-prompt"><span class="intro-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="intro-label"></span></span></button><button class="intro-sound" type="button" hidden>Sound off</button><button class="intro-skip" type="button">Skip intro</button>';
   const video = overlay.querySelector('video');
   const logo = overlay.querySelector('.intro-logo');
+  const halo = overlay.querySelector('.intro-halo');
   const enter = overlay.querySelector('.intro-enter');
   const sound = overlay.querySelector('.intro-sound');
   const skip = overlay.querySelector('.intro-skip');
+  overlay.querySelector('.intro-label').textContent = matchMedia('(pointer: coarse)').matches ? 'Tap to enter' : 'Press to enter';
   logo.src = new URL('watch-icon.webp?v=webp-1', base).href;
   video.src = new URL('intro.mp4?v=transform-1', base).href;
   document.body.append(overlay);
@@ -134,6 +136,12 @@
       }
     }
     logo.style.transform = `translate(-50%, -50%) translateY(${y}px) rotate(${renderedAngle}deg) scale(${expansion * xScale}, ${expansion * yScale})`;
+    // Light from the glass logo pools beneath it: brighter and tighter as it comes closer.
+    if (!transformStart) {
+      const near = Math.max(0, 1 - Math.abs(Math.min(0, y)) / (logoSize * 1.4));
+      halo.style.opacity = (near * (.85 + Math.max(-.15, Math.min(.15, y / 60)))).toFixed(3);
+      halo.style.transform = `translateX(-50%) scale(${(1 + y / 160).toFixed(3)}, 1)`;
+    }
     video.style.height = `${renderedHeight}px`;
     video.style.width = `${renderedHeight * aspectRatio}px`;
     video.style.transform = `translate(-50%, -50%) translateY(${y}px) rotate(${renderedAngle}deg) scale(${xScale}, ${yScale})`;
@@ -181,7 +189,10 @@
       frame = requestAnimationFrame(render);
     }
   }
-  function syncSound() { sound.textContent = video.muted ? 'Sound on' : 'Sound off'; }
+  function syncSound() {
+    sound.textContent = video.muted ? 'Sound on' : 'Sound off';
+    sound.dataset.muted = String(video.muted);
+  }
   function activate() {
     if (state !== 'entrance') return;
     setState('transformation');
