@@ -1,5 +1,20 @@
 (() => {
   'use strict';
+  // Fit the 540×680 device stage to its scene: --device-fill of the height, 114% of the width.
+  const fitScene = document.querySelector('.device-scene');
+  if (fitScene) {
+    const fit = () => {
+      const { width, height } = fitScene.getBoundingClientRect();
+      const style = getComputedStyle(fitScene);
+      const fill = parseFloat(style.getPropertyValue('--device-fill')) || .8;
+      const max = parseFloat(style.getPropertyValue('--device-max')) || 1.05;
+      const scale = Math.min(max, height * fill / 680, width * 1.14 / 540);
+      if (scale > 0) fitScene.style.setProperty('--device-scale', scale.toFixed(4));
+    };
+    fit();
+    if ('ResizeObserver' in window) new ResizeObserver(fit).observe(fitScene);
+    else window.addEventListener('resize', fit, { passive: true });
+  }
   const story = document.querySelector('.story');
   const scene = document.querySelector('.device-scene');
   const phone = document.querySelector('.phone');

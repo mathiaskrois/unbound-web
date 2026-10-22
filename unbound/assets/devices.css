@@ -4,7 +4,9 @@
 
 /* The 540×680 stage scales to fit its scene. --device-fill is the share of the scene
    height the stage may use; the stage may overhang the scene width slightly, because the
-   devices do not fill the stage edge to edge. */
+   devices do not fill the stage edge to edge. landing.js measures the scene and sets
+   --device-scale (Safari 26 resolves container units inside tan(atan2()) to a negative
+   scale, so the fit is not computed in CSS). */
 .device-scene { container-type: size; grid-template-rows: minmax(0, 1fr); --device-fill: .8; --device-max: 1.05; }
 .device-canvas {
   position: relative;
@@ -14,11 +16,9 @@
   perspective: 1300px;
   transform: scale(var(--device-scale, .9));
 }
-@supports (width: calc(tan(atan2(1px, 1px)) * 1px)) {
-  .device-canvas {
-    --device-scale: min(var(--device-max), tan(atan2(calc(100cqh * var(--device-fill)), 680px)), tan(atan2(calc(100cqw * 1.14), 540px)));
-  }
-}
+/* Without JavaScript the stage keeps a conservative per-width scale. */
+@media (max-width: 900px) { .device-scene { --device-scale: .7; } }
+@media (max-width: 480px) { .device-scene { --device-scale: .55; } }
 .device { position: absolute; transform-style: preserve-3d; }
 
 /* A thin machined enclosure, a dark gasket, and uninterrupted edge-to-edge glass. */

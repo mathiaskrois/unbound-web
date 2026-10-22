@@ -110,7 +110,25 @@ test('no horizontal overflow across phone, tablet, landscape, and desktop widths
   for (const width of [320, 375, 390, 768, 844, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: width === 844 ? 390 : 900 });
     await jump(page, 0);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow at ${width}`).toBe(true);
+    // The device stage is refitted by a ResizeObserver, which runs before the next paint.
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `overflow at ${width}`).toBe(true);
+  }
+});
+
+test('device stage is upright and scaled to fit its scene', async ({ page }) => {
+  for (const path of ['/unbound/', '/unbound/experience/']) {
+    await page.goto(path);
+    for (const [width, height] of [[390, 844], [768, 1024], [1100, 800], [1440, 900], [1920, 1080]]) {
+      await page.setViewportSize({ width, height });
+      await expect.poll(() => page.evaluate(() => {
+        const scene = document.querySelector('.device-scene');
+        const { width, height } = scene.getBoundingClientRect();
+        const style = getComputedStyle(scene);
+        const expected = Math.min(parseFloat(style.getPropertyValue('--device-max')), height * parseFloat(style.getPropertyValue('--device-fill')) / 680, width * 1.14 / 540);
+        const matrix = new DOMMatrix(getComputedStyle(document.querySelector('.device-canvas')).transform);
+        return expected > 0 && matrix.a > 0 && matrix.a === matrix.d && Math.abs(matrix.a - expected) < .002;
+      }), `${path} at ${width}×${height}`).toBe(true);
+    }
   }
 });
 
